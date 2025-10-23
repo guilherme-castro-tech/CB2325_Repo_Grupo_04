@@ -3,11 +3,22 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-
-class Matriz:
-  pass # __init__, __str__, __add__, __mul__, transposta, inversa ...
-  '''O professor ainda decidirá se essa classe deve ser implementada ou se poderá ser
-  usada as operações de algebra linear disponíveis no Numpy'''
   
 def aproximação_polinomial(pontos: list, grau: int):
-  pass #Retornar uma lista com os coeficientes do polinômio calculado?
+  
+  '''Por enquanto o código apenas aceita uma lista de tuplas,
+  e não uma lista para cada coordenada.'''
+  x, y = zip(*pontos)
+
+  # Passo a passo para regressão polinomial.
+  # Leia-se @ como produto, .T como transposta.
+  V = np.vander(x, grau, increasing=True) #Matriz de Vandermonde
+  V1 = V.T @ V
+  V2 = np.linalg.inv(V1)
+  Y = V.T @ y
+  S = V2 @ Y
+  return S
+
+# Teste de aproximação quadrática com 4 pontos
+l = [(1, 3), (2, 4), (3, 7), (4, 5)]
+print(aproximação_polinomial(l, 3))
