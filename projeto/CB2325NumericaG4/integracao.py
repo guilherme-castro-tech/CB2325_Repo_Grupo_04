@@ -1,5 +1,5 @@
 import math, random
-import numpy as np
+
 
 
 
@@ -16,14 +16,14 @@ def integral_trap(funcao, a, b, n):        #integração por trapézios
         s += (funcao(a + c*dx) + funcao(a + (c+1)*dx))*(dx/2) #Calcula as aproximações
     return s
 
-
+"""
 def integral_rect(funcao, a, b, n):            #integração por retângulos. Estou tentando encontrar uma forma mais rápida de fazer a integração. 
                                                #Esse método usa um array e aplica a função por meio de map ao invés de aplicar em um valor de cada vez com o 'for', é um pouco mais rápido, mas ocupa muita memória. Não consegui contornar esse problema ainda.
-    """
+    '''
     O primeiro parâmetro é uma função, o segundo e o 
     terceiro são os limites de integração, o quarto é
     em quantos retângulos a função é dividida.
-    """
+    '''
     s = 0
     dx = (b-a)/ n
     chunk = n // 10000
@@ -36,7 +36,7 @@ def integral_rect(funcao, a, b, n):            #integração por retângulos. Es
         vals = a + (dx*np.arange(start,end))
         arr = np.fromiter(map(funcao,vals),dtype=float)
         s += float(np.sum(arr)*dx)'''
-    return s
+    return s"""
 
 def integral_rect2(funcao, a, b, n):            #essa função usa uma sequência parecida com a do método de trapézios
     """
