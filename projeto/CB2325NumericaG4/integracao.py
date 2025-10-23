@@ -1,4 +1,6 @@
-import math
+import math, random
+import numpy as np
+
 
 
 
@@ -14,7 +16,7 @@ def integral_trap(funcao, a, b, n):        #integração por trapézios
         s += (funcao(a + c*dx) + funcao(a + (c+1)*dx))*(dx/2) #Calcula as aproximações
     return s
 
-import numpy as np
+
 def integral_rect(funcao, a, b, n):            #integração por retângulos. Estou tentando encontrar uma forma mais rápida de fazer a integração. 
                                                #Esse método usa um array e aplica a função por meio de map ao invés de aplicar em um valor de cada vez com o 'for', é um pouco mais rápido, mas ocupa muita memória. Não consegui contornar esse problema ainda.
     """
@@ -50,8 +52,28 @@ def integral_rect2(funcao, a, b, n):            #essa função usa uma sequênci
         s += (funcao(a + c*dx))*dx
     return s
 
+
+def monteCarlo(a, b, c, d, funcao, n):
+    """monte Carlo é magia"""
+    """
+    Para calcular Integrais de funções de 2 variaveis, 
+    ou seja, Calcular volume, podemos escolher n pontos no R² de forma aleatória, 
+    calcular o valor da função nesses pontos, somar todos. 
+    Após isso, fazer uma média de todos os valores e multiplicar pela área do domínio"""
+    s = 0
+    for i in range(n):
+        x = random.uniform(a, b)#Escolhe a coordenada 
+        y = random.uniform(c, d)
+        s += funcao(x, y)
+    
+    media = s/n
+    return media*(b-a)*(d-c)
+
 if __name__ == "__main__":
     n = 100000000
     print(integral_trap(math.sin, 0, math.pi, n))
     print(integral_rect(math.sin, 0, math.pi, n))
     print(integral_rect(math.sin, 0, math.pi, n))
+    f = lambda x, y: math.sin(x)*math.cos(y)
+    print(monteCarlo(0, math.pi/2, 0, math.pi/2, f, 10000000))
+
