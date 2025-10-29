@@ -32,7 +32,7 @@ def regressao_polinomial(grau: int = 1, pontos: list = None, *, x: list = None, 
 
     # Passo a passo para regressão polinomial (Mínimos quadrados).
     # coeficientes = (V^T * V)^{-1} * V^T * ycords
-    # Leia-se @ como produto e .T como transposta.
+    # Leia-se @ como produto, .T como transposta.
 
     V = np.vander(xcoords, grau+1, increasing=True) # Cria uma matriz de Vandermonde
     V1 = V.T @ V                                    
@@ -40,6 +40,21 @@ def regressao_polinomial(grau: int = 1, pontos: list = None, *, x: list = None, 
     Y = V.T @ ycoords                                
     coeficientes = V2 @ Y   # Encontra os coeficientes
     return coeficientes
+
+def plot_regressao_polinomial(grau: int = 1, pontos: list = None, *, x: list = None, y: list = None):
+
+    """
+    Cria uma representação gráfica para uma aproximação polinomial de um conjunto de pontos.
+
+    Parâmetros:     
+        grau (inteiro positivo): Indica o grau do polinômio que vai aproximar os pontos;    
+        pontos (lista): Conjunto de pontos formados por duas coordenadas (x,y);     
+        x/y: (listas): Opção alternativa. Duas listas com as coordenadas x e y para cada ponto respectivamente.
+    
+    Retorna: Uma imagem contendo os pontos fornecidos e o gráfico da aproximação.
+    """
+
+    #Implementar a função utilizando o matplotlib
 
 if __name__ == '__main__':
     
