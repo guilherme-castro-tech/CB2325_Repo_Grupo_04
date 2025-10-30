@@ -63,7 +63,9 @@ if __name__ == '__main__':
     pontos = [[1, 3], [2, 4], [3, 7], [4, 5]]
     print(regressao_polinomial(2, pontos))
 
-    print('Teste 2:')
+    print('Teste 2:')    # O teste 2 está retornando: "[-2.55795385e-13  1.64313008e-14  1.00000000e+00]" como melhor aproximação ao invés de "[0. ,0. ,1.]".
+                         # Acredito que está tendo algum acúmulo de erro numérico.
     a = [1, 2, 3, 4]
     b = [1, 4, 9, 16]
     print(regressao_polinomial(2, x=a, y=b))
+
