@@ -38,7 +38,7 @@ def integral_rect(funcao, a, b, n):            #integração por retângulos. Es
         s += float(np.sum(arr)*dx)'''
     return s"""
 
-def integral_rect2(funcao, a, b, n):            #essa função usa uma sequência parecida com a do método de trapézios
+def integral_rect(funcao, a, b, n):            #essa função usa uma sequência parecida com a do método de trapézios
     """
     O primeiro parâmetro é uma função, o segundo e o 
     terceiro são os limites de integração, o quarto é
@@ -73,7 +73,8 @@ if __name__ == "__main__":
     n = 100000000
     print(integral_trap(math.sin, 0, math.pi, n))
     print(integral_rect(math.sin, 0, math.pi, n))
-    print(integral_rect(math.sin, 0, math.pi, n))
+    #print(integral_rect(math.sin, 0, math.pi, n))
     f = lambda x, y: math.sin(x)*math.cos(y)
     print(monteCarlo(0, math.pi/2, 0, math.pi/2, f, 10000000))
+
 
