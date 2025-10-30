@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def regressao_polinomial(grau: int = 1, pontos: list = None, *, x: list = None, y: list = None):
 
     """
@@ -28,18 +29,24 @@ def regressao_polinomial(grau: int = 1, pontos: list = None, *, x: list = None, 
         raise TypeError("Argumento 'grau' deve ser inteiro não negativo")
     
     if len(xcoords) != len(ycoords):
-        raise ValueError("As listas de coordenadas devem ter o mesmo tamanho")
-
-    # Passo a passo para regressão polinomial (Mínimos quadrados).
+        raise ValueError("As listas de coordenadas não possuem o mesmo tamanho")
+    
+    if grau >= len(xcoords):
+        raise ValueError("Argumento 'grau' é maior ou igual ao número de pontos. Não há solução única para o sistema")
+    
+    if len(xcoords) != len(set(xcoords)):
+        raise ValueError("Há diferentes pontos com mesma coordenada x")
+    
+    # Passo a passo para regressão polinomial (Mínimos quadrados)
     # coeficientes = (V^T * V)^{-1} * V^T * ycords
-    # Leia-se @ como produto, .T como transposta.
+    # Leia-se @ como produto, .T como transposta
 
     V = np.vander(xcoords, grau+1, increasing=True) # Cria uma matriz de Vandermonde
     V1 = V.T @ V                                    
-    V2 = np.linalg.inv(V1)  # Inverte a matriz V1
     Y = V.T @ ycoords                                
-    coeficientes = V2 @ Y   # Encontra os coeficientes
+    coeficientes = np.linalg.solve(V1, Y) # Encontra os coeficientes através de decomposição LU
     return coeficientes
+
 
 def plot_regressao_polinomial(grau: int = 1, pontos: list = None, *, x: list = None, y: list = None):
 
@@ -56,16 +63,16 @@ def plot_regressao_polinomial(grau: int = 1, pontos: list = None, *, x: list = N
 
     #Implementar a função utilizando o matplotlib
 
+
 if __name__ == '__main__':
     
     #Testes:
     print('Teste 1:')
-    pontos = [[1, 3], [2, 4], [3, 7], [4, 5]]
-    print(regressao_polinomial(2, pontos))
+    pontos = [[1, 3], [2, 6], [3, 9]]
+    print(regressao_polinomial(1, pontos))
 
-    print('Teste 2:')    # O teste 2 está retornando: "[-2.55795385e-13  1.64313008e-14  1.00000000e+00]" como melhor aproximação ao invés de "[0. ,0. ,1.]".
-                         # Acredito que está tendo algum acúmulo de erro numérico.
+    print('Teste 2:')
     a = [1, 2, 3, 4]
     b = [1, 4, 9, 16]
     print(regressao_polinomial(2, x=a, y=b))
-
+    
