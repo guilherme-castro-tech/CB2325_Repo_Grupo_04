@@ -1,10 +1,5 @@
 import math, random
 
-
-
-
-
-
 def integral_trap(funcao, a, b, n=10):        #integração por trapézios
     """O primeiro parametro é uma função, O segundo e o 
     Terceiro são os limites de integração, O
@@ -52,7 +47,7 @@ def integral_rect(funcao, a, b, n=10):            #essa função usa uma sequên
         s += (funcao(a + c*dx))*dx
     return s
 
-def integral_simpson_gamer(funcao, a, b, n=10):
+def integral_simpson(funcao, a, b, n=10):
     """O primeiro parametro é uma função, O segundo e o 
     Terceiro são os limites de integração, O
     Quarto é em quantos trapezios você quer aproximar a sua função"""
@@ -89,10 +84,11 @@ if __name__ == "__main__":
     
     print(integral_trap(math.sin, 0, math.pi, n*3))         #n*3
     print(integral_rect(math.sin, 0, math.pi, n)*6)         #n*6
-    print(integral_simpson_gamer(math.sin, 0, math.pi, n*2))#n*2, as quantidades aqui são multiplicadas por 3, 6 e 2 para cancelar a diferença de velocidade entre elas, assim é possível comparar a precisão obtida por cada método depois de um mesmo período de tempo
+    print(integral_simpson(math.sin, 0, math.pi, n*2))#n*2, as quantidades aqui são multiplicadas por 3, 6 e 2 para cancelar a diferença de velocidade entre elas, assim é possível comparar a precisão obtida por cada método depois de um mesmo período de tempo
     #print(integral_rect(math.sin, 0, math.pi, n))
     f = lambda x, y: math.sin(x)*math.cos(y)
     print(monteCarlo(0, math.pi/2, 0, math.pi/2, f, n))
+
 
 
 
