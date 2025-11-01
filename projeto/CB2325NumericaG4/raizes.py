@@ -50,6 +50,12 @@ def metodo_da_bissecao(f, a: float, b: float, tol=1e-6):
 
     return raiz, aproximacoes
 
+def metodo_da_secante(f, a, b, tol):
+    return "Em andamento"
+
+def metodo_de_newton(f, a, b, tol):
+    return "Em andamento"
+
 # Plotagem:
 
 def plotagem(f, a: float, b: float, aproximacoes: list, raiz: float, method=None):
@@ -86,3 +92,41 @@ def plotagem(f, a: float, b: float, aproximacoes: list, raiz: float, method=None
     plt.grid(True, linestyle="--", alpha=0.6)
     plt.legend()
     plt.show()
+
+# Função principal:
+
+def raiz(f, a: float, b: float, tol=1e-6, method=None):
+
+    """
+    Objetivo:
+        Executar um método numérico para encontrar uma raiz de f(x) 
+        no intervalo [a, b] e exibir o gráfico do processo.
+          
+    Parâmetros:
+        f (função): função contínua
+        a, b (float): extremos do intervalo [a, b]
+        tol (float): precisão
+        method (str): nome do método ("bissecao", "secante" ou "newton")
+
+    Retorno:
+        Valor aproximado da raiz (float)
+    """
+
+    if method == "bissecao":
+        raiz, aprox = metodo_da_bissecao(f, a, b, tol)
+        if raiz is not None:
+            plotagem(f, a, b, aprox, raiz, method="bissecao")
+        return raiz
+    
+    elif method == "secante":
+        raiz, aprox = metodo_da_secante(f, a, b, tol)
+        plotagem(f, a, b, aprox, raiz, method="secante")
+        return raiz
+    
+    elif method == "newton":
+        raiz, aprox = metodo_de_newton(f, a, b, tol)
+        plotagem(f, a, b, aprox, raiz, method="newton")
+        return raiz
+    
+    else:
+        raise ValueError("Método inválido!")
