@@ -130,3 +130,32 @@ def raiz(f, a: float, b: float, tol=1e-6, method=None):
     
     else:
         raise ValueError("Método inválido!")
+    
+# Exemplos provisórios (por enquanto só para o método da bisseção):
+
+if __name__ == "__main__":
+
+    f1 = lambda x: math.exp(-x) - x
+    print("  Exemplo 1 (raiz decimal infinita)  ".center(100, "─"))
+    print("\nFunção: f(x) = e⁻ˣ-x")
+    print("Intervalo: [0, 1]\n")
+    print(f"Raiz aproximada pelo Método da Bisseção: {raiz(f1, 0, 1, method='bissecao'):.3f}\n")  # resposta esperada: ≈ 0.567
+
+    f2 = lambda x: x**2 - 4
+    print("  Exemplo 2 (raiz exata)  ".center(100, "─"))
+    print("\nFunção: f(x) = x²-4")
+    print("Intervalo: [1, 3]\n")
+    print(f"Raiz pelo Método da Bisseção: {raiz(f2, 1, 3, method='bissecao'):.1f}\n")  # resposta esperada: = 2 
+
+    f3 = lambda x: abs(x)
+    print("  Exemplo 3 (há raiz, mas o Método da Bisseção não calcula)  ".center(100, "─"))
+    print("\nFunção: f(x) = |x|")
+    print("Intervalo: [-1, 1]\n")
+    print(f"Raiz pelo Método da Bisseção: {raiz(f3, -1, 1, method='bissecao')}\n")  # resposta esperada: None
+
+    f4 = lambda x: x**2 + 4
+    print("  Exemplo 4 (não há raízes)  ".center(100, "─"))
+    print("\nFunção: f(x) = x²+4")
+    print("Intervalo: [-2, 2]\n")
+    print(f"Raiz pelo Método da Bisseção: {raiz(f4, -2, 2, method='bissecao')}\n")  # resposta esperada: None
+
