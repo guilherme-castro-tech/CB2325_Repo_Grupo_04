@@ -49,3 +49,40 @@ def metodo_da_bissecao(f, a: float, b: float, tol=1e-6):
     raiz = c
 
     return raiz, aproximacoes
+
+# Plotagem:
+
+def plotagem(f, a: float, b: float, aproximacoes: list, raiz: float, method=None):
+
+    """
+    Objetivo:
+        Criar uma representação gráfica das aproximação feitas para encontar a raiz 
+
+    Parâmetros:
+        f (função): função contínua
+        a, b (float): extremos do intervalo [a, b]
+        raiz: valor x tal que f(x) == 0
+        aproximacoes: lista que guarda os pontos de aproximações para encontrar a raiz
+        method: o método escolhido para encontrar a raiz
+    """
+
+    # Eixos: 
+    valores_x = np.linspace(a - 1, b + 1, 200)  # eixo x
+    valores_y = [f(x) for x in valores_x]  # eixo y
+
+    plt.plot(valores_x, valores_y, label="Curva f(x)", color="#13505B")
+    plt.axhline(0, color="black", linewidth=1)
+ 
+    # Marcação das aproximações:
+    plt.scatter(aproximacoes, [f(x) for x in aproximacoes], color="#0C7489", label="Aproximações")
+    plt.scatter(raiz, f(raiz), color="#ED217C", label="Raiz final", zorder=5)
+
+    # Plotagem:
+    nomes = {"bissecao": "Bisseção", "secante": "Secante", "newton": "Newton"}
+
+    plt.title(f"Método da {nomes[method]}")
+    plt.xlabel("Eixo X")
+    plt.ylabel("Eixo Y")
+    plt.grid(True, linestyle="--", alpha=0.6)
+    plt.legend()
+    plt.show()
