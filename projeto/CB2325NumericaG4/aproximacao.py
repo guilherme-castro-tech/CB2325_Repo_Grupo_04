@@ -4,7 +4,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 def regressao_polinomial(grau: int = 1, pontos: list = None, *, x: list = None, y: list = None):
 
     """
@@ -47,7 +46,6 @@ def regressao_polinomial(grau: int = 1, pontos: list = None, *, x: list = None, 
     coeficientes = np.linalg.solve(V1, Y) # Encontra os coeficientes através de decomposição LU
     return coeficientes
 
-
 def plot_regressao_polinomial(grau: int = 1, pontos: list = None, *, x: list = None, y: list = None):
 
     """
@@ -61,8 +59,32 @@ def plot_regressao_polinomial(grau: int = 1, pontos: list = None, *, x: list = N
     Retorna: Uma imagem contendo os pontos fornecidos e o gráfico da aproximação.
     """
 
-    #Implementar a função utilizando o matplotlib
+    if pontos:                          # Analisa se o método de imput escolhido foi a lista de pontos (x,y)
+        coeficientes = regressao_polinomial(grau, pontos)
+        xcoords, ycoords = zip(*pontos)
+    elif x and y:                       # Analisa se o método de imput escolhido foi as listas de coordenadas em x e y
+        coeficientes = regressao_polinomial(grau, x=x, y=y)
+        xcoords, ycoords = x, y
+    else:
+        raise TypeError("Falta de argumentos obrigatórios -> 'pontos' ou ambos 'x' e 'y'")
 
+    # Plotagem:
+
+    a, b = min(xcoords), max(xcoords)
+    eixo_x = np.linspace(a, b, 200) # Cria pontos no eixo x no intervalo [a, b]
+
+    eixo_y = np.zeros_like(eixo_x)
+    for i in range(len(coeficientes)): # Encontra os pontos no eixo y 
+        eixo_y += coeficientes[i]*(eixo_x**i)
+    
+    plt.plot(eixo_x, eixo_y, color='#13505b', label='Curva') # Plota o gráfico
+    plt.plot(xcoords, ycoords, 'o', color='#ed217c', label='Pontos') # Plota os pontos
+    plt.title(f'Aproximação polinomial de grau {grau}') # Título
+    plt.xlabel('Eixo X')
+    plt.ylabel('Eixo Y')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
 if __name__ == '__main__':
     
@@ -70,9 +92,10 @@ if __name__ == '__main__':
     print('Teste 1:')
     pontos = [[1, 3], [2, 6], [3, 9]]
     print(regressao_polinomial(1, pontos))
+    plot_regressao_polinomial(1, pontos)
 
     print('Teste 2:')
     a = [1, 2, 3, 4]
     b = [1, 4, 9, 16]
     print(regressao_polinomial(2, x=a, y=b))
-    
+    plot_regressao_polinomial(2, x=a, y=b)
