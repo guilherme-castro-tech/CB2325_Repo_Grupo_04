@@ -224,23 +224,23 @@ if __name__ == "__main__":
     print("  Exemplo 1 (raiz decimal infinita)  ".center(100, "─"))
     print("\nFunção: f(x) = e⁻ˣ-x")
     print("Intervalo: [0, 1]\n")
-    print(f"Raiz aproximada pelo Método da Newton Raphson: {raiz(n1, 0, 1, method='newton_raphson'):.3f}\n")  # resposta esperada: ≈ 0.567
+    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(n1, 0, 1, method='newton_raphson'):.3f}\n")  # resposta esperada: ≈ 0.567
 
     n2 = lambda x: x**2 - 4
     print("  Exemplo 2 (raiz exata)  ".center(100, "─"))
     print("\nFunção: f(x) = x²-4")
     print("Intervalo: [1, 3]\n")
-    print(f"Raiz aproximada pelo Método da Newton Raphson: {raiz(n2, 1, 3, method='newton_raphson'):.1f}\n")  # resposta esperada: = 2 
+    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(n2, 1, 3, method='newton_raphson'):.1f}\n")  # resposta esperada: = 2.0 
 
     n3 = lambda x: abs(x)
     print("  Exemplo 3 (raiz exata)  ".center(100, "─"))
     print("\nFunção: f(x) = |x|")
     print("Intervalo: [-1, 1]\n")
-    print(f"Raiz aproximada pelo Método da Newton Raphson: {raiz(n3, -1, 1, method='newton_raphson')}\n")  # resposta esperada: None
+    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(n3, -1, 1, method='newton_raphson')}\n")  # resposta esperada: 0.0
 
     n4 = lambda x: x**2 + 4
     print("  Exemplo 4 (não há raízes)  ".center(100, "─"))
     print("\nFunção: f(x) = x²+4")
     print("Intervalo: [-2, 2]\n")
-    print(f"Raiz aproximada pelo Método da Newton Raphson: {raiz(n4, -2, 2, method='newton_raphson')}\n")  # resposta esperada: None
+    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(n4, -2, 2, method='newton_raphson')}\n")  # resposta esperada: None
     
