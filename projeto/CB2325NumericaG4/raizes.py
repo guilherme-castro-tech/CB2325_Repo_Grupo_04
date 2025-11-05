@@ -1,22 +1,26 @@
 # Importações:
-
 import math
 import numpy as np
-from scipy.misc import derivative
 import matplotlib.pyplot as plt
 
-# Métodos:
+# Funções auxiliares:
+def derivada(f, x, h=1e-6):
+    return (f(x + h) - f(x - h)) / (2*h)
 
+# Métodos numéricos para encontrar raízes de funções reais:
 def metodo_da_bissecao(f, a: float, b: float, tol=1e-6):
 
     """
     Objetivo: 
-        Determinar uma raiz real de f(x) no intervalo [a, b] pelo método da bisseção. 
+        Determinar uma raiz real de f(x) no intervalo [a, b] pelo método da bisseção.
+
+    Explicação:
+        A ideia é encontrar a raiz através de uma busca binária em [a, b], utilizando uma função contínua em [a, b] tal que f(a)*f(b) < 0.
         
     Parâmetros: 
-        f (função): função contínua 
-        a, b (float): extremos do intervalo [a, b] 
-        tol (float): precisão 
+        f (função): função contínua
+        a, b (float): extremos do intervalo [a, b]
+        tol (float): precisão
 
     Retorno: 
         Valor aproximado da raiz de f(x), com precisão 10⁻⁶ (float), e lista de aproximações. 
@@ -57,7 +61,10 @@ def metodo_da_secante(f, a, b, tol):
 def metodo_de_newton_raphson(f, a, b, tol):
     """
     Objetivo: 
-        Determinar uma raiz real de f(x) no intervalo [a, b] pelo método de Newton-Raphson. 
+        Determinar uma raiz real de f(x) no intervalo [a, b].
+    
+    Explicação:
+        A ideia é iterar em direção a uma raiz da função, ajustando continuamente a estimativa da raiz com base na tangente à curva da função no ponto atual. 
         
     Parâmetros: 
         f (função): função contínua 
@@ -69,47 +76,64 @@ def metodo_de_newton_raphson(f, a, b, tol):
         Retorna (None, []) se não houver mudança de sinal no intervalo.
     """
 
-    # x_m = x_{n+1}
-
+	# Inicializa xn como o extremo inicial do intervalo 'a'.
     xn = a
+	
+	# Condição para do loop (while).
     passo = False
+
+	# Cria uma lista, originalmente vazia, para adicionar posteriormente os pontos percorridos durante a aproximação.
     aprox = []
+	
+	# Inicializa a vraiável raiz.
     raiz = None
 
     while passo == False:
-        df_dx = derivative(f, xn, dx=tol)
-        
+		# Calcula a derivada de f(x)
+        df_dx = derivada(f, xn, h=tol)
+
+		# Verifica se a derivada é válida ou não.
         if abs(df_dx) < tol:
+			# A derivada não é válida.
             passo = True
             return None, aprox
         
         else:
+			# A derivada é válida.
+			# Verifica se 'a' (extremo inicial do intervalo) é uma raiz.
             if abs(f(a)) <= tol:
                 raiz = a
 
+			# Verifica se 'b' (extremo final do intervalo) é uma raiz.
             elif abs(f(b)) <= tol:
                 raiz = b
 
             else:
+				# Considere xm como o valor seguinte para x a ser verificado depois de xn.
                 xm = xn - (f(xn) / df_dx)
 
+				# Verifica se xm pertence ao intevalo [a, b].
                 if a <= xm <= b:
+					# xm pertence ao intevalo [a, b].
+					# Verifica se 'xm' é uma raiz.
                     if abs(f(xm)) <= tol:
                         raiz = xm
                         passo = True
 
                     else:
+						# Adiciona xm na list de pontos percorridos.
                         aprox.append(xn)
+						# xn armazena o valor de xm para calcular o próximo valor para x.
                         xn = xm
 
                 else:
+					# xm não pertence ao intevalo [a, b].
                     passo = True
                     return None, aprox
 
-    return raiz, aprox
+    return raiz, aprox # Retorna a raiz e a lista de pontos percorridos.
 
-# Plotagem:
-
+# Plotagem dos gráficos:
 def plotagem(f, a: float, b: float, aproximacoes: list, raiz: float, method=None):
 
     """
@@ -149,7 +173,6 @@ def plotagem(f, a: float, b: float, aproximacoes: list, raiz: float, method=None
     plt.show()
 
 # Função principal:
-
 def raiz(f, a: float, b: float, tol=1e-6, method=None):
 
     """
@@ -189,8 +212,8 @@ def raiz(f, a: float, b: float, tol=1e-6, method=None):
         raise ValueError("Método inválido!")
     
 # Exemplos provisórios para o método da Bisseção:
-
 if __name__ == "__main__":
+    print("=============================== Exemplos para o Método da Bisseção: ================================\n")
 
     b1 = lambda x: math.exp(-x) - x
     print("  Exemplo 1 (raiz decimal infinita)  ".center(100, "─"))
@@ -217,14 +240,14 @@ if __name__ == "__main__":
     print(f"Raiz pelo Método da Bisseção: {raiz(b4, -2, 2, method='bissecao')}\n")  # resposta esperada: None
     
 # Exemplos provisórios para o método de Newton-Raphson:
-
 if __name__ == "__main__":
+    print("============================ Exemplos para o Método de Newton-Raphson: =============================\n")
 
     n1 = lambda x: math.exp(-x) - x
     print("  Exemplo 1 (raiz decimal infinita)  ".center(100, "─"))
     print("\nFunção: f(x) = e⁻ˣ-x")
     print("Intervalo: [0, 1]\n")
-    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(n1, 0, 1, method='newton_raphson'):.3f}\n")  # resposta esperada: ≈ 0.567
+    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(n1, 0, 1, method='newton_raphson'):.3f}\n")  # resposta esperada: ≈ 0.57
 
     n2 = lambda x: x**2 - 4
     print("  Exemplo 2 (raiz exata)  ".center(100, "─"))
