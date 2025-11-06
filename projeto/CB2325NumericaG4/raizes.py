@@ -59,7 +59,7 @@ def metodo_da_bissecao(f, a: float, b: float, tol=1e-6):
 def metodo_da_secante(f, a, b, tol):
     return "Em andamento"
 
-def metodo_de_newton_raphson(f, a: float, b: float, tol=1e-6):
+def metodo_de_newton_raphson(f, a: float, b: float, tol):
     """
     Objetivo: 
         Determinar uma raiz real de f(x) no intervalo [a, b] pelo método de Newton Raphson.
@@ -137,7 +137,7 @@ def metodo_de_newton_raphson(f, a: float, b: float, tol=1e-6):
     return raiz, aprox # Retorna a raiz e a lista de pontos percorridos.
 
 # Plotagem dos gráficos:
-def plotagem(f, a: float, b: float, aproximacoes: list, raiz: float, method=None):
+def plotagem_raiz(f, a: float, b: float, tol=1e-6, method=None):
 
     """
     Objetivo:
@@ -146,11 +146,29 @@ def plotagem(f, a: float, b: float, aproximacoes: list, raiz: float, method=None
     Parâmetros:
         f (função): função contínua
         a, b (float): extremos do intervalo [a, b]
-        raiz: valor x tal que f(x) == 0
-        aproximacoes: lista que guarda os pontos de aproximações para encontrar a raiz
+        tol (float): precisão 
         method: o método escolhido para encontrar a raiz
     """
 
+    # Determinação do valor da raiz (float) e dos pontos de aproximação (list):
+    if method == "bissecao":
+        raiz, aprox = metodo_da_bissecao(f, a, b, tol)
+        if raiz is None:
+            raise ValueError('Não é possível plotar o gráfico.')
+    
+    elif method == "secante":
+        raiz, aprox = metodo_da_secante(f, a, b, tol)
+        if raiz is None:
+            raise ValueError('Não é possível plotar o gráfico.')
+    
+    elif method == "newton_raphson":
+        raiz, aprox = metodo_de_newton_raphson(f, a, b, tol)
+        if raiz is None:
+            raise ValueError('Não é possível plotar o gráfico.')
+    
+    else:
+        raise ValueError("Método inválido!")
+    
     # Eixos: 
     valores_x = np.linspace(a - 1, b + 1, 200)  # eixo x
     valores_y = [f(x) for x in valores_x]  # eixo y
@@ -159,7 +177,7 @@ def plotagem(f, a: float, b: float, aproximacoes: list, raiz: float, method=None
     plt.axhline(0, color="black", linewidth=1)
  
     # Marcação das aproximações:
-    plt.scatter(aproximacoes, [f(x) for x in aproximacoes], color="#0C7489", label="Aproximações")
+    plt.scatter(aprox, [f(x) for x in aprox], color="#0C7489", label="Aproximações")
     
     if raiz is not None:
         plt.scatter(raiz, f(raiz), color="#ED217C", label="Raiz final", zorder=5)
@@ -194,20 +212,15 @@ def raiz(f, a: float, b: float, tol=1e-6, method=None):
     """
 
     if method == "bissecao":
-        raiz, aprox = metodo_da_bissecao(f, a, b, tol)
-        if raiz is not None:
-            plotagem(f, a, b, aprox, raiz, method="bissecao")
+        raiz = metodo_da_bissecao(f, a, b, tol)[0]
         return raiz
     
     elif method == "secante":
-        raiz, aprox = metodo_da_secante(f, a, b, tol)
-        plotagem(f, a, b, aprox, raiz, method="secante")
+        raiz = metodo_da_secante(f, a, b, tol)[0]
         return raiz
     
     elif method == "newton_raphson":
-        raiz, aprox = metodo_de_newton_raphson(f, a, b, tol)
-        if raiz is not None:
-            plotagem(f, a, b, aprox, raiz, method="newton_raphson")
+        raiz = metodo_de_newton_raphson(f, a, b, tol)[0]
         return raiz
     
     else:
@@ -216,32 +229,64 @@ def raiz(f, a: float, b: float, tol=1e-6, method=None):
 # Exemplos:
 if __name__ == "__main__":
     
+    # Função e intervalo:
     f1 = lambda x: math.exp(-x) - x
     print("  Exemplo 1 (raiz decimal infinita)  ".center(100, "─"))
     print("\nFunção: f(x) = e⁻ˣ-x")
     print("Intervalo: [0, 1]\n")
+
+    # Métodos:
     print(f"Raiz aproximada pelo Método da Bisseção: {raiz(f1, 0, 1, 1e-6, method='bissecao'):.3f}")  # Resposta esperada: ≈ 0.567
     print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(f1, 0, 1, 1e-6, method='newton_raphson'):.3f}\n") # Resposta esperada: ≈ 0.567
 
+    # Plotagens:
+    plotagem_raiz(f1, a=0, b=1, tol=1e-6, method='bissecao')
+    plotagem_raiz(f1, a=0, b=1, tol=1e-6, method='newton_raphson')
+
+
+
+    # Função e intervalo:
     f2 = lambda x: x**2 - 4
     print("  Exemplo 2 (raiz exata)  ".center(100, "─"))
     print("\nFunção: f(x) = x²-4")
     print("Intervalo: [1, 3]\n")
+    
+    # Métodos:
     print(f"Raiz pelo Método da Bisseção: {raiz(f2, 1, 3, 1e-6, method='bissecao'):.1f}")  # Resposta esperada: 2.0
     print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(f2, 1, 3, 1e-6, method='newton_raphson'):.1f}\n") # Resposta esperada: 2.0
 
+    # Plotagens:
+    plotagem_raiz(f2, a=1, b=3, tol=1e-6, method='bissecao')
+    plotagem_raiz(f2, a=1, b=3, tol=1e-6, method='newton_raphson')
 
+
+
+    # Função e intervalo:
     f3 = lambda x: abs(x)
     print("  Exemplo 3 (função com raiz, mas que não muda de sinal)  ".center(100, "─"))
     print("\nFunção: f(x) = |x|")
     print("Intervalo: [-1, 1]\n")
 
+    # Métodos:
     print(f"Raiz pelo Método da Bisseção: {raiz(f3, -1, 1, 1e-6, method='bissecao')}")  # Resposta esperada: None
     print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(f3, -1, 1, 1e-6, method='newton_raphson'):.1f}\n")  # Resposta esperada: 0.0
 
+    # Plotagens:
+    plotagem_raiz(f3, a=-1, b=1, tol=1e-6, method='bissecao')
+    plotagem_raiz(f3, a=-1, b=1, tol=1e-6, method='newton_raphson')
+
+
+
+    # Função e intervalo:
     f4 = lambda x: x**2 + 4
     print("  Exemplo 4 (não há raízes)  ".center(100, "─"))
     print("\nFunção: f(x) = x²+4")
     print("Intervalo: [-2, 2]\n")
+
+    # Métodos:
     print(f"Raiz pelo Método da Bisseção: {raiz(f4, -2, 2, 1e-6, method='bissecao')}")  # resposta esperada: None
     print(f"Raiz pelo Método da Newton-Raphson: {raiz(f4, -2, 2, 1e-6, method='newton_raphson')}\n")  # resposta esperada: None
+
+    # Plotagens:
+    plotagem_raiz(f4, a=-2, b=2, tol=1e-6, method='bissecao')
+    plotagem_raiz(f4, a=-2, b=2, tol=1e-6, method='newton_raphson')
