@@ -15,7 +15,8 @@ def metodo_da_bissecao(f, a: float, b: float, tol=1e-6):
         Determinar uma raiz real de f(x) no intervalo [a, b] pelo método da bisseção.
 
     Explicação:
-        A ideia é encontrar a raiz através de uma busca binária em [a, b], utilizando uma função contínua em [a, b] tal que f(a)*f(b) < 0.
+        A ideia é encontrar a raiz através de uma busca binária em [a, b], utilizando uma função 
+        contínua em [a, b] tal que f(a)*f(b) < 0.
         
     Parâmetros: 
         f (função): função contínua
@@ -41,7 +42,7 @@ def metodo_da_bissecao(f, a: float, b: float, tol=1e-6):
     else:
         # Caso em que a raiz pertence ao intervalo (a, b):
         while abs(b - a) >= tol:
-            c = (a + b) / 2  # ponto médio
+            c = (a + b) / 2  # Ponto médio
             aproximacoes.append(c)
 
             if f(c) == 0:
@@ -58,13 +59,14 @@ def metodo_da_bissecao(f, a: float, b: float, tol=1e-6):
 def metodo_da_secante(f, a, b, tol):
     return "Em andamento"
 
-def metodo_de_newton_raphson(f, a, b, tol):
+def metodo_de_newton_raphson(f, a: float, b: float, tol=1e-6):
     """
     Objetivo: 
-        Determinar uma raiz real de f(x) no intervalo [a, b].
+        Determinar uma raiz real de f(x) no intervalo [a, b] pelo método de Newton Raphson.
     
     Explicação:
-        A ideia é iterar em direção a uma raiz da função, ajustando continuamente a estimativa da raiz com base na tangente à curva da função no ponto atual. 
+        A ideia é iterar em direção a uma raiz da função, ajustando continuamente a estimativa da 
+        raiz com base na tangente à curva da função no ponto atual. 
         
     Parâmetros: 
         f (função): função contínua 
@@ -82,10 +84,11 @@ def metodo_de_newton_raphson(f, a, b, tol):
 	# Condição para do loop (while).
     passo = False
 
-	# Cria uma lista, originalmente vazia, para adicionar posteriormente os pontos percorridos durante a aproximação.
+	# Cria uma lista, originalmente vazia, para adicionar posteriormente os pontos percorridos 
+    # durante a aproximação.
     aprox = []
 	
-	# Inicializa a vraiável raiz.
+	# Inicializa a variável raiz.
     raiz = None
 
     while passo == False:
@@ -205,65 +208,40 @@ def raiz(f, a: float, b: float, tol=1e-6, method=None):
         raiz, aprox = metodo_de_newton_raphson(f, a, b, tol)
         if raiz is not None:
             plotagem(f, a, b, aprox, raiz, method="newton_raphson")
-            raiz = float(f"{raiz:.2f}")
         return raiz
     
     else:
         raise ValueError("Método inválido!")
     
-# Exemplos provisórios para o método da Bisseção:
+# Exemplos:
 if __name__ == "__main__":
-    print("=============================== Exemplos para o Método da Bisseção: ================================\n")
-
-    b1 = lambda x: math.exp(-x) - x
+    
+    f1 = lambda x: math.exp(-x) - x
     print("  Exemplo 1 (raiz decimal infinita)  ".center(100, "─"))
     print("\nFunção: f(x) = e⁻ˣ-x")
     print("Intervalo: [0, 1]\n")
-    print(f"Raiz aproximada pelo Método da Bisseção: {raiz(b1, 0, 1, method='bissecao'):.3f}\n")  # resposta esperada: ≈ 0.567
+    print(f"Raiz aproximada pelo Método da Bisseção: {raiz(f1, 0, 1, 1e-6, method='bissecao'):.3f}")  # Resposta esperada: ≈ 0.567
+    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(f1, 0, 1, 1e-6, method='newton_raphson'):.3f}\n") # Resposta esperada: ≈ 0.567
 
-    b2 = lambda x: x**2 - 4
+    f2 = lambda x: x**2 - 4
     print("  Exemplo 2 (raiz exata)  ".center(100, "─"))
     print("\nFunção: f(x) = x²-4")
     print("Intervalo: [1, 3]\n")
-    print(f"Raiz pelo Método da Bisseção: {raiz(b2, 1, 3, method='bissecao'):.1f}\n")  # resposta esperada: = 2 
+    print(f"Raiz pelo Método da Bisseção: {raiz(f2, 1, 3, 1e-6, method='bissecao'):.1f}")  # Resposta esperada: 2.0
+    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(f2, 1, 3, 1e-6, method='newton_raphson'):.1f}\n") # Resposta esperada: 2.0
 
-    b3 = lambda x: abs(x)
-    print("  Exemplo 3 (há raiz, mas o Método da Bisseção não calcula)  ".center(100, "─"))
+
+    f3 = lambda x: abs(x)
+    print("  Exemplo 3 (função com raiz, mas que não muda de sinal)  ".center(100, "─"))
     print("\nFunção: f(x) = |x|")
     print("Intervalo: [-1, 1]\n")
-    print(f"Raiz pelo Método da Bisseção: {raiz(b3, -1, 1, method='bissecao')}\n")  # resposta esperada: None
 
-    b4 = lambda x: x**2 + 4
+    print(f"Raiz pelo Método da Bisseção: {raiz(f3, -1, 1, 1e-6, method='bissecao')}")  # Resposta esperada: None
+    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(f3, -1, 1, 1e-6, method='newton_raphson'):.1f}\n")  # Resposta esperada: 0.0
+
+    f4 = lambda x: x**2 + 4
     print("  Exemplo 4 (não há raízes)  ".center(100, "─"))
     print("\nFunção: f(x) = x²+4")
     print("Intervalo: [-2, 2]\n")
-    print(f"Raiz pelo Método da Bisseção: {raiz(b4, -2, 2, method='bissecao')}\n")  # resposta esperada: None
-    
-# Exemplos provisórios para o método de Newton-Raphson:
-if __name__ == "__main__":
-    print("============================ Exemplos para o Método de Newton-Raphson: =============================\n")
-
-    n1 = lambda x: math.exp(-x) - x
-    print("  Exemplo 1 (raiz decimal infinita)  ".center(100, "─"))
-    print("\nFunção: f(x) = e⁻ˣ-x")
-    print("Intervalo: [0, 1]\n")
-    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(n1, 0, 1, method='newton_raphson'):.3f}\n")  # resposta esperada: ≈ 0.57
-
-    n2 = lambda x: x**2 - 4
-    print("  Exemplo 2 (raiz exata)  ".center(100, "─"))
-    print("\nFunção: f(x) = x²-4")
-    print("Intervalo: [1, 3]\n")
-    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(n2, 1, 3, method='newton_raphson'):.1f}\n")  # resposta esperada: = 2.0 
-
-    n3 = lambda x: abs(x)
-    print("  Exemplo 3 (raiz exata)  ".center(100, "─"))
-    print("\nFunção: f(x) = |x|")
-    print("Intervalo: [-1, 1]\n")
-    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(n3, -1, 1, method='newton_raphson')}\n")  # resposta esperada: 0.0
-
-    n4 = lambda x: x**2 + 4
-    print("  Exemplo 4 (não há raízes)  ".center(100, "─"))
-    print("\nFunção: f(x) = x²+4")
-    print("Intervalo: [-2, 2]\n")
-    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(n4, -2, 2, method='newton_raphson')}\n")  # resposta esperada: None
-    
+    print(f"Raiz pelo Método da Bisseção: {raiz(f4, -2, 2, 1e-6, method='bissecao')}")  # resposta esperada: None
+    print(f"Raiz pelo Método da Newton-Raphson: {raiz(f4, -2, 2, 1e-6, method='newton_raphson')}\n")  # resposta esperada: None
