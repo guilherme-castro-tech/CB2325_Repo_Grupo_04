@@ -53,4 +53,85 @@ def liner_interp(xp_data:list,yp_data:list, x_est:list):
 
     return y_est
 
+import matplotlib.pyplot as plt
+import numpy as np
+### BASE DO CÓDIGO, QUE AINDA SERÁ UNIDO COM OS DEMAIS DE INTERPOLAÇÃO E RECEBERÁ COMENTÁRIOS E DOCSTRINGS
+class poly_interp:
+    ''' 
+      Classe que cria um polinômio interpolador a partir dos pontos dados pelo método de Newton, 
+      retornando o gráfico e quando definida e chamada com um argumento, retorna o valor do 
+      polinômio no valor do argumento.
+
+      Args:
+          x: lista que representa as coordenadas x's dos pontos.
+          y: lista que representa as coordenadas y's dos pontos.
+      
+      Return:
+          Quando somente inicializada, retorna:
+          calcular_coef(): retorna uma lista com os coeficientes encontrados. 
+          grafico(): retorna um gráfico do polinômio interpolador e os pontos dados. 
+    '''
+
+    def __init__(self,x:list,y:list):
+      self.n = len(x)
+      if self.n != len(y):
+        raise TypeError('x e y não possuem o mesmo tamanho')
+      self.x = np.array(x)
+      self.y = np.array(y)
+      self.coeficientes = None
+      self.tabela = None
+      self.calcular_coef()
+      self.grafico()
+
+    def calcular_coef(self):
+      self.tabela = np.zeros((self.n, self.n))
+      self.tabela[:,0] = self.y
+      for j in range(1, self.n):
+        for i in range(self.n - j):
+          numerador = self.tabela[i+1, j-1] - self.tabela[i, j-1]
+          denominador = self.x[i+j] - self.x[i]
+          if denominador == 0:
+            raise ZeroDivisionError('Há dois pontos com a mesma coordenada x.')
+          self.tabela[i, j] = numerador / denominador
+      self.coeficientes = self.tabela[0,:]
+
+    def valor_polinomio(self, x_desejado):
+      x_desejado = np.atleast_1d(x_desejado)
+      def evaluate_single_point(x_val):
+        resultado = self.coeficientes[self.n - 1]
+        for i in range(self.n - 2, -1, -1):
+          resultado = self.coeficientes[i] + (x_val - self.x[i]) * resultado
+        return resultado
+      return np.array([evaluate_single_point(x_val) for x_val in x_desejado])
+
+    def __call__(self, x_desejado):
+      return self.valor_polinomio(x_desejado)
+
+    ##### Gráfico provisório 
+    def grafico(self):
+      curva_x = np.linspace(min(self.x), max(self.x), 200)
+      y_polinomio = self.valor_polinomio(curva_x)
+      fig, ax1 = plt.subplots(figsize=(10, 6))
+      fig.suptitle(f'Interpolação de Newton (Grau {self.n-1})')
+
+      ax1.plot(curva_x, y_polinomio, color='blue', linestyle='-', label=f'Polinômio $P_{{{self.n-1}}}(x)$ (Newton)')
+      ax1.scatter(self.x, self.y, color='red', marker='o', zorder=5, label='Pontos de Interpolação')
+      ax1.set_xlabel('Eixo X')
+      ax1.set_ylabel('Valor de $P(x)$', color='blue')
+      ax1.tick_params(axis='y', labelcolor='blue')
+      ax1.grid(True)
+      ax1.legend(loc='upper left')
+      plt.show()
+
+x_points = [1, 2, 3]
+y_points = [1, 4, 9]
+
+interpolator = poly_interp(x_points, y_points)
+print(f"Coeficientes do polinômio (b_0, b_1, ...): {interpolator.coeficientes}")
+
+# Testando o polinômio
+print(f"Valor do polinômio em x=1: {interpolator(1)}")
+print(f"Valor do polinômio em x=2: {interpolator(2)}")
+print(f"Valor do polinômio em x=3: {interpolator(4)}")
+print(f"Valor do polinômio em x=2.5: {interpolator(2.5)}")
 
