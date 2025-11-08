@@ -37,6 +37,7 @@ class Interp:
     def calcular_coef(self):
       self.tabela = np.zeros((self.n, self.n))
       self.tabela[:,0] = self.y
+
       for j in range(1, self.n):
         for i in range(self.n - j):
           numerador = self.tabela[i+1, j-1] - self.tabela[i, j-1]
@@ -138,26 +139,55 @@ class Interp:
         return self.y[-1]
          
       return None
-        
+    
+    def __repr__(self):
+      '''
+      Retorna a representação do objeto
+      de Interpolação bem como o polinômio
+      interpolador dos pontos.
+      '''
+      if self.metodo == "newton":
+        polinomio = f"P(x) = {self.coeficientes[0]:.3f}"
+        for i in range(1, self.n):
+          term =f" + {self.coeficientes[i]:.3f}" if self.coeficientes[i] >= 0 else f" - {abs(self.coeficientes[i]):.3f}"
+          product_str = ""
+          for j in range(i):
+            x_val = self.x[j]
+            if x_val == 0:
+              product_str += "(x)"
+            else:
+              sign = "-" if x_val > 0 else "+"
+              product_str += f"(x {sign} {abs(x_val)})"
+            polinomio+= term+product_str
+        repr = f'Interp(metodo = {self.metodo}) \n\tx={self.x}, \n\ty={self.y} \n\t{polinomio})'
+        return repr
+      
 
+      elif self.metodo == "linear":
+        repr = f'Interp(metodo = {self.metodo}) \n\tx={self.x}, \n\ty={self.y})'
+        return repr
 
-x_points = [1, 2, 3]
-y_points = [1, 4, 9]
+if __name__ == "__main__":
 
-interpolator = Interp(x_points, y_points, metodo="newton")
-print(f"Coeficientes do polinômio (b_0, b_1, ...): {interpolator.coeficientes}")
-# Testando o polinômio
-print(f"Valor do polinômio em x=1: {interpolator(1)}")
-print(f"Valor do polinômio em x=2: {interpolator(2)}")
-print(f"Valor do polinômio em x=3: {interpolator(3)}")
-print(f"Valor do polinômio em x=2.5: {interpolator(2.5)}")
-
-interpolator2 = Interp(x_points, y_points, metodo="linear")
-# Testando Interpolação Linear
-print(f"Valor de interpolação linear em x=1: {interpolator2(1)}")
-print(f"Valor de interpolação linear em x=2: {interpolator2(2)}")
-print(f"Valor de interpolação linear em x=3: {interpolator2(3)}")
-print(f"Valor de interpolação linear em x=2.5: {interpolator2(2.5)}")
-
-interpolator.grafico(salvar_como="CB2325_Repo_Grupo_04/images/interp_newton.png")
-interpolator2.grafico(salvar_como="CB2325_Repo_Grupo_04/images/interp_linear.png")
+  x_points = [1, 2, 3]
+  y_points = [1, 4, 9]
+  
+  interpolator = Interp(x_points, y_points, metodo="newton")
+  print(f"Coeficientes do polinômio (b_0, b_1, ...): {interpolator.coeficientes}")
+  # Testando o polinômio
+  print(f"Valor do polinômio em x=1: {interpolator(1)}")
+  print(f"Valor do polinômio em x=2: {interpolator(2)}")
+  print(f"Valor do polinômio em x=3: {interpolator(3)}")
+  print(f"Valor do polinômio em x=2.3: {interpolator(2.5)}")
+  
+  interpolator2 = Interp(x_points, y_points, metodo="linear")
+  # Testando Interpolação Linear
+  print(f"Valor de interpolação linear em x=1: {interpolator2(1)}")
+  print(f"Valor de interpolação linear em x=2: {interpolator2(2)}")
+  print(f"Valor de interpolação linear em x=3: {interpolator2(3)}")
+  print(f"Valor de interpolação linear em x=2.3: {interpolator2(2.5)}")
+  
+  # interpolator.grafico(salvar_como="CB2325_Repo_Grupo_04/images/interp_newton.png")
+  # interpolator2.grafico(salvar_como="CB2325_Repo_Grupo_04/images/interp_linear.png")
+  
+  print(interpolator)
