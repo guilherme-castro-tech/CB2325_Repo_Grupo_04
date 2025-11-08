@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 ### BASE DO CÓDIGO, QUE AINDA SERÁ UNIDO COM OS DEMAIS DE INTERPOLAÇÃO E RECEBERÁ COMENTÁRIOS E DOCSTRINGS
 
-class Interp:
+class Poly_Interp():
     ''' 
       Classe que cria um polinômio interpolador a partir dos pontos dados pelo método de Newton, 
       retornando o gráfico e quando definida e chamada com um argumento, retorna o valor do 
@@ -18,20 +18,15 @@ class Interp:
           grafico(): retorna um gráfico do polinômio interpolador e os pontos dados. 
     '''
 
-    def __init__(self,x:list,y:list, metodo="linear"):
+    def __init__(self, x:list, y:list):
       self.n = len(x)
       if self.n != len(y):
         raise TypeError('x e y não possuem o mesmo tamanho')
       self.x = np.array(x)
       self.y = np.array(y)
-      self.metodo = metodo
       self.coeficientes = None
       self.tabela = None
-
-      if self.metodo == "newton": # Não há necessidade de calcular para todos as interpolações
-          self.calcular_coef()
-      elif self.metodo != "linear":
-          raise ValueError("Método não suportado. Escolha 'newton' ou 'linear'.")
+      self.calcular_coef()
       self.grafico()
 
     def calcular_coef(self):
@@ -57,17 +52,10 @@ class Interp:
       return np.array([evaluate_single_point(x_val) for x_val in x_desejado])
 
     def __call__(self, x_desejado):
-      if self.metodo =="newton":
         if isinstance(x_desejado, int) or isinstance(x_desejado, float) or len(x_desejado) == 1:
           return self.valor_polinomio(x_desejado)
         else:
           return np.array([self.valor_polinomio(x) for x in x_desejado])
-        
-      if self.metodo == "linear":
-        if isinstance(x_desejado, int) or isinstance(x_desejado, float) or len(x_desejado) == 1:
-          return self._liner_interp(x_desejado)
-        else:
-           return np.array([self._liner_interp(x) for x in x_desejado])
 
     ##### Gráfico provisório 
     def grafico(self, salvar_como = None):
@@ -78,15 +66,9 @@ class Interp:
       ax1.tick_params(axis='y', labelcolor='blue')
       ax1.grid(True)
 
-      if self.metodo == "newton": 
-        y_interp = self.valor_polinomio(curva_x)
-        title = f'Interpolação de Newton (Grau {self.n-1})'
-        plot_label = f'Polinômio $P_{{{self.n-1}}}(x)$ (Newton)'
-      
-      elif self.metodo == "linear":
-        y_interp = np.array([self._liner_interp(x)for x in curva_x])
-        title = f'Interpolação Linear'
-        plot_label = f''
+      y_interp = self.valor_polinomio(curva_x)
+      title = f'Interpolação de Newton (Grau {self.n-1})'
+      plot_label = f'Polinômio $P_{{{self.n-1}}}(x)$ (Newton)'
       
       fig.suptitle(title)
       ax1.plot(curva_x, y_interp, color='blue', linestyle='-', label=plot_label)
@@ -101,6 +83,46 @@ class Interp:
                 print(f"Erro ao salvar o gráfico: {e}")
       plt.show()
 
+    def __repr__(self):
+      '''
+      Retorna a representação do objeto
+      de Interpolação bem como o polinômio
+      interpolador dos pontos.
+      '''
+      polinomio = f"P(x) = {self.coeficientes[0]:.3f}"
+      for i in range(1, self.n):
+        term =f" + {self.coeficientes[i]:.3f}" if self.coeficientes[i] >= 0 else f" - {abs(self.coeficientes[i]):.3f}"
+        product_str = ""
+        for j in range(i):
+          x_val = self.x[j]
+          if x_val == 0:
+            product_str += "(x)"
+          else:
+            sign = "-" if x_val > 0 else "+"
+            product_str += f"(x {sign} {abs(x_val)})"
+          polinomio+= term+product_str
+      repr = f'Interp(metodo = Polinomial) \n\tx={self.x}, \n\ty={self.y} \n\t{polinomio})'
+      return repr
+      
+
+
+class Linear_Interp():
+    def __init__(self, x, y):
+       self.x = x 
+       self.y = y
+       self.grafico()
+      
+
+    def __call__(self,  x_desejado):
+        if isinstance(x_desejado, int) or isinstance(x_desejado, float) or len(x_desejado) == 1:
+          return self._liner_interp(x_desejado)
+        else:
+           return np.array([self._liner_interp(x) for x in x_desejado])
+
+    def __repr__(self):
+      repr = f'Interp(metodo = linear \n\tx={self.x}, \n\ty={self.y})'
+      return repr
+    
     def _liner_interp(self, x_est):          ## Método privado, acessado pelo argumento ao chamar a classe:
       '''
       Essa função gera uma interpolação linear por partes
@@ -140,54 +162,53 @@ class Interp:
          
       return None
     
-    def __repr__(self):
-      '''
-      Retorna a representação do objeto
-      de Interpolação bem como o polinômio
-      interpolador dos pontos.
-      '''
-      if self.metodo == "newton":
-        polinomio = f"P(x) = {self.coeficientes[0]:.3f}"
-        for i in range(1, self.n):
-          term =f" + {self.coeficientes[i]:.3f}" if self.coeficientes[i] >= 0 else f" - {abs(self.coeficientes[i]):.3f}"
-          product_str = ""
-          for j in range(i):
-            x_val = self.x[j]
-            if x_val == 0:
-              product_str += "(x)"
-            else:
-              sign = "-" if x_val > 0 else "+"
-              product_str += f"(x {sign} {abs(x_val)})"
-            polinomio+= term+product_str
-        repr = f'Interp(metodo = {self.metodo}) \n\tx={self.x}, \n\ty={self.y} \n\t{polinomio})'
-        return repr
+    def grafico(self, salvar_como = None):
+
+      curva_x = np.linspace(min(self.x), max(self.x), max(1000,10*len(self.x)))
+      fig, ax1 = plt.subplots(figsize=(10, 6))
+      ax1.set_xlabel('Eixo X')
+      ax1.set_ylabel('Valor de Interpolação', color='blue')
+      ax1.tick_params(axis='y', labelcolor='blue')
+      ax1.grid(True)
+
+      y_interp = np.array([self._liner_interp(x)for x in curva_x])
+      title = f'Interpolação Linear'
+      plot_label = f''
+
+      fig.suptitle(title)
+      ax1.plot(curva_x, y_interp, color='blue', linestyle='-', label=plot_label)
+      ax1.scatter(self.x, self.y, color='red', marker='o', zorder=5, label='Pontos de Interpolação')
+      ax1.legend(loc='upper left')
       
-
-      elif self.metodo == "linear":
-        repr = f'Interp(metodo = {self.metodo}) \n\tx={self.x}, \n\ty={self.y})'
-        return repr
-
+      if salvar_como:
+            try:
+                plt.savefig(salvar_como)
+                print(f"Gráfico salvo em: {salvar_como}")
+            except Exception as e:
+                print(f"Erro ao salvar o gráfico: {e}")
+      plt.show()
+    
 if __name__ == "__main__":
 
   x_points = [1, 2, 3]
   y_points = [1, 4, 9]
-  
-  interpolator = Interp(x_points, y_points, metodo="newton")
+
+  interpolator = Poly_Interp(x_points, y_points)
   print(f"Coeficientes do polinômio (b_0, b_1, ...): {interpolator.coeficientes}")
   # Testando o polinômio
   print(f"Valor do polinômio em x=1: {interpolator(1)}")
   print(f"Valor do polinômio em x=2: {interpolator(2)}")
   print(f"Valor do polinômio em x=3: {interpolator(3)}")
   print(f"Valor do polinômio em x=2.3: {interpolator(2.5)}")
-  
-  interpolator2 = Interp(x_points, y_points, metodo="linear")
+
+  interpolator2 = Linear_Interp(x_points, y_points)
   # Testando Interpolação Linear
   print(f"Valor de interpolação linear em x=1: {interpolator2(1)}")
   print(f"Valor de interpolação linear em x=2: {interpolator2(2)}")
   print(f"Valor de interpolação linear em x=3: {interpolator2(3)}")
   print(f"Valor de interpolação linear em x=2.3: {interpolator2(2.5)}")
-  
+
   # interpolator.grafico(salvar_como="CB2325_Repo_Grupo_04/images/interp_newton.png")
   # interpolator2.grafico(salvar_como="CB2325_Repo_Grupo_04/images/interp_linear.png")
-  
+
   print(interpolator)
