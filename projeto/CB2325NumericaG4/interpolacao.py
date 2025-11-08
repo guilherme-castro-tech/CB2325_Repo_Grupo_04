@@ -1,62 +1,8 @@
-def liner_interp(xp_data:list,yp_data:list, x_est:list):
-    '''
-    Essa função gera uma interpolação linear por partes
-    para um conjunto discreto de pontos, obedecendo à
-    seguinte fórmula y = y_0 + [(y_1-y_0)/(x_1-x_0)].(x-x_0)
-
-    Ou seja, o ponto (x,y) é obtido encontrando o valor 
-    correspondente da ordenada y dados um ponto abscissa x
-    tal que este estaja no seguinto de reta que liga o ponto
-    (x_0,y_0) ao ponto (x_1,y_1)
-
-    Args:
-        xp_data (list) : lista ordenada dos pontos da abscissa 
-        yp_data (list) : lista ordenada dos pontos da ordenada
-        x_est   (list) : lista ordenada dos pontos que se deseja estimar a função
-    Returns:
-        y_est (list) : lista dos pontos associados ao x_est
-    '''
-
-    if len(xp_data) != len(yp_data):
-        raise IndexError("As listas xp_data e yp_data não têm mesmo tamanho!")
-    if len(xp_data) < 2:
-        raise IndexError("Pelo menos dois pontos necessários para interpolar!")
-    
-    y_est = []                                          # Lista para guardar valores estimados 
-    for x in x_est:
-        '''
-        3 casos:
-        - menor que o menor ponto
-        - maior que o maior ponto
-        - entre os pontos
-        '''
-        if x < xp_data[0]:                              # menor que o menor ponto
-            x0 , y0 = xp_data[0], yp_data[0]
-            x1 , y1 = xp_data[1], yp_data[1] 
-        
-        elif x > xp_data[-1]:                           # maior que o maior ponto
-            x0 , y0 = xp_data[-2], yp_data[-2]
-            x1 , y1 = xp_data[-1], yp_data[-1] 
-
-        else:
-            for i in range(len(xp_data)-1):             ## Iterando sobre a lista ordenada x, associada a y para encontrar em que segmento de rete estão os pontos
-                if (xp_data[i]<x) and (x<=xp_data[i+1]):## Aqui eu assumi que está entre os pontos, mas se ele estiver exatamente no ponto?
-                    x0, y0 = xp_data[i], yp_data[i]
-                    x1, y1 = xp_data[i+1], yp_data[i+1]
-                    break
-                if xp_data[i] == x:                     ## Assumindo que ele é um dos pontos do meu conjunto de pontos
-                    x0, y0 = xp_data[i], yp_data[i]
-                    x1, y1 = xp_data[i+1], yp_data[i+1] ## y0 = y(x0) para não quebrar boas práticas, definimos isso    
-                
-        y = y0 + [(y1-y0)/(x1-x0)]*(x-x0)               ## Calcular o valor de x e adicionar à lista de y_est
-        y_est.append(y)
-
-    return y_est
-
 import matplotlib.pyplot as plt
 import numpy as np
 ### BASE DO CÓDIGO, QUE AINDA SERÁ UNIDO COM OS DEMAIS DE INTERPOLAÇÃO E RECEBERÁ COMENTÁRIOS E DOCSTRINGS
-class poly_interp:
+
+class Interp:
     ''' 
       Classe que cria um polinômio interpolador a partir dos pontos dados pelo método de Newton, 
       retornando o gráfico e quando definida e chamada com um argumento, retorna o valor do 
@@ -72,15 +18,20 @@ class poly_interp:
           grafico(): retorna um gráfico do polinômio interpolador e os pontos dados. 
     '''
 
-    def __init__(self,x:list,y:list):
+    def __init__(self,x:list,y:list, metodo="linear"):
       self.n = len(x)
       if self.n != len(y):
         raise TypeError('x e y não possuem o mesmo tamanho')
       self.x = np.array(x)
       self.y = np.array(y)
+      self.metodo = metodo
       self.coeficientes = None
       self.tabela = None
-      self.calcular_coef()
+
+      if self.metodo == "newton": # Não há necessidade de calcular para todos as interpolações
+          self.calcular_coef()
+      elif self.metodo != "linear":
+          raise ValueError("Método não suportado. Escolha 'newton' ou 'linear'.")
       self.grafico()
 
     def calcular_coef(self):
@@ -105,33 +56,108 @@ class poly_interp:
       return np.array([evaluate_single_point(x_val) for x_val in x_desejado])
 
     def __call__(self, x_desejado):
-      return self.valor_polinomio(x_desejado)
+      if self.metodo =="newton":
+        if isinstance(x_desejado, int) or isinstance(x_desejado, float) or len(x_desejado) == 1:
+          return self.valor_polinomio(x_desejado)
+        else:
+          return np.array([self.valor_polinomio(x) for x in x_desejado])
+        
+      if self.metodo == "linear":
+        if isinstance(x_desejado, int) or isinstance(x_desejado, float) or len(x_desejado) == 1:
+          return self._liner_interp(x_desejado)
+        else:
+           return np.array([self._liner_interp(x) for x in x_desejado])
 
     ##### Gráfico provisório 
-    def grafico(self):
+    def grafico(self, salvar_como = None):
       curva_x = np.linspace(min(self.x), max(self.x), 200)
-      y_polinomio = self.valor_polinomio(curva_x)
       fig, ax1 = plt.subplots(figsize=(10, 6))
-      fig.suptitle(f'Interpolação de Newton (Grau {self.n-1})')
-
-      ax1.plot(curva_x, y_polinomio, color='blue', linestyle='-', label=f'Polinômio $P_{{{self.n-1}}}(x)$ (Newton)')
-      ax1.scatter(self.x, self.y, color='red', marker='o', zorder=5, label='Pontos de Interpolação')
       ax1.set_xlabel('Eixo X')
-      ax1.set_ylabel('Valor de $P(x)$', color='blue')
+      ax1.set_ylabel('Valor de Interpolação', color='blue')
       ax1.tick_params(axis='y', labelcolor='blue')
       ax1.grid(True)
+
+      if self.metodo == "newton": 
+        y_interp = self.valor_polinomio(curva_x)
+        title = f'Interpolação de Newton (Grau {self.n-1})'
+        plot_label = f'Polinômio $P_{{{self.n-1}}}(x)$ (Newton)'
+      
+      elif self.metodo == "linear":
+        y_interp = np.array([self._liner_interp(x)for x in curva_x])
+        title = f'Interpolação Linear'
+        plot_label = f''
+      
+      fig.suptitle(title)
+      ax1.plot(curva_x, y_interp, color='blue', linestyle='-', label=plot_label)
+      ax1.scatter(self.x, self.y, color='red', marker='o', zorder=5, label='Pontos de Interpolação')
       ax1.legend(loc='upper left')
+      
+      if salvar_como:
+            try:
+                plt.savefig(salvar_como)
+                print(f"Gráfico salvo em: {salvar_como}")
+            except Exception as e:
+                print(f"Erro ao salvar o gráfico: {e}")
       plt.show()
+
+    def _liner_interp(self, x_est):          ## Método privado, acessado pelo argumento ao chamar a classe:
+      '''
+      Essa função gera uma interpolação linear por partes
+      para um conjunto discreto de pontos, obedecendo à
+      seguinte fórmula y = y_0 + [(y_1-y_0)/(x_1-x_0)].(x-x_0)
+
+      Ou seja, o ponto (x,y) é obtido encontrando o valor 
+      correspondente da ordenada y dados um ponto abscissa x
+      tal que este estaja no seguinto de reta que liga o ponto
+      (x_0,y_0) ao ponto (x_1,y_1)
+
+      Args:
+          self.x (np.array) : lista ordenada dos pontos da abscissa 
+          self.y (np.array) : lista ordenada dos pontos da ordenada
+          x_est  (float) ou (int) : ponto a estimar
+      Returns:
+          y_est (float) ou (int) : ponto estimado
+      '''
+      if x_est<self.x[0] or x_est > self.x[-1]:
+         return None                        ## A maneira de tratar extrapolação aqui é retornar None.
+      
+      for i in range(len(self.x)- 1):
+         if self.x[i] <= x_est <= self.x[i+1]:
+            x0,y0 = self.x[i], self.y[i]
+            x1,y1 = self.x[i+1], self.y[i+1]
+
+            if x1 == x0: 
+              y_est = y0
+              return y_est
+            
+            tg_theta = (y1-y0)/(x1-x0)
+            y_est = y0 + tg_theta * (x_est - x0)
+            return y_est
+          # Caso x_est seja exatamente o último ponto
+      if x_est == self.x[-1]:
+        return self.y[-1]
+         
+      return None
+        
+
 
 x_points = [1, 2, 3]
 y_points = [1, 4, 9]
 
-interpolator = poly_interp(x_points, y_points)
+interpolator = Interp(x_points, y_points, metodo="newton")
 print(f"Coeficientes do polinômio (b_0, b_1, ...): {interpolator.coeficientes}")
-
 # Testando o polinômio
 print(f"Valor do polinômio em x=1: {interpolator(1)}")
 print(f"Valor do polinômio em x=2: {interpolator(2)}")
-print(f"Valor do polinômio em x=3: {interpolator(4)}")
+print(f"Valor do polinômio em x=3: {interpolator(3)}")
 print(f"Valor do polinômio em x=2.5: {interpolator(2.5)}")
 
+interpolator2 = Interp(x_points, y_points, metodo="linear")
+# Testando Interpolação Linear
+print(f"Valor de interpolação linear em x=1: {interpolator2(1)}")
+print(f"Valor de interpolação linear em x=2: {interpolator2(2)}")
+print(f"Valor de interpolação linear em x=3: {interpolator2(3)}")
+print(f"Valor de interpolação linear em x=2.5: {interpolator2(2.5)}")
+
+interpolator.grafico(salvar_como="CB2325_Repo_Grupo_04/images/interp_newton.png")
+interpolator2.grafico(salvar_como="CB2325_Repo_Grupo_04/images/interp_linear.png")
