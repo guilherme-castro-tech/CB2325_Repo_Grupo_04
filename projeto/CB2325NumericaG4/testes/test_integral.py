@@ -1,4 +1,4 @@
-from integracao.py import integral_trap, integral_rect, integral_simpson, monteCarlo
+from integracao import integral_trap, integral_rect, integral_simpson, monteCarlo
 import math
 import pytest
 
