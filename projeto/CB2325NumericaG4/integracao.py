@@ -1,3 +1,5 @@
+import math
+import pytest
 import math, random
 
 def integral_trap(funcao, a, b, n=10):        #integração por trapézios
@@ -11,27 +13,6 @@ def integral_trap(funcao, a, b, n=10):        #integração por trapézios
         s += (funcao(a + c*dx) + funcao(a + (c+1)*dx))*(dx/2) #Calcula as aproximações
     return s
 
-"""
-def integral_rect(funcao, a, b, n):            #integração por retângulos. Estou tentando encontrar uma forma mais rápida de fazer a integração. 
-                                               #Esse método usa um array e aplica a função por meio de map ao invés de aplicar em um valor de cada vez com o 'for', é um pouco mais rápido, mas ocupa muita memória. Não consegui contornar esse problema ainda.
-    '''
-    O primeiro parâmetro é uma função, o segundo e o 
-    terceiro são os limites de integração, o quarto é
-    em quantos retângulos a função é dividida.
-    '''
-    s = 0
-    dx = (b-a)/ n
-    chunk = n // 10000
-    vals = a + dx*np.arange(n)
-    lista = map(funcao, vals)
-    s = sum(lista)*dx
-    #print(chunk)
-    '''for start in range(0,n,chunk):
-        end = min(n,chunk+start)
-        vals = a + (dx*np.arange(start,end))
-        arr = np.fromiter(map(funcao,vals),dtype=float)
-        s += float(np.sum(arr)*dx)'''
-    return s"""
 
 def integral_rect(funcao, a, b, n=10):            #essa função usa uma sequência parecida com a do método de trapézios
     """
@@ -74,8 +55,26 @@ def monteCarlo(a, b, c, d, funcao, n=10):
     media = s/n
     return media*(b-a)*(d-c)
 
+def test_integral_trap():
+    assert abs(integral_trap(math.sin, 0, math.pi, 100000) - 2) < 1e-5
+    assert abs(integral_trap(lambda x: x**2, 0, 1, 100000) - (1/3)) < 1e-5
+
+def test_integral_rect():
+    assert abs(integral_rect(math.sin, 0, math.pi, 100000) - 2) < 1e-5
+    assert abs(integral_rect(lambda x: x**2, 0, 1, 100000) - (1/3)) < 1e-5
+
+def test_integral_simpson():
+    assert abs(integral_simpson(math.sin, 0, math.pi, 100000) - 2) < 1e-5
+    assert abs(integral_simpson(lambda x: x**2, 0, 1, 100000) - (1/3)) < 1e-5
+
+def test_monteCarlo():
+    f = lambda x, y: x*y
+    assert abs(monteCarlo(0, 1, 0, 1, f, 10000) - 0.25) < 1e-2
+    g = lambda x, y: math.sin(x)*math.cos(y)
+    assert abs(monteCarlo(0, math.pi/2, 0, math.pi/2, g, 10000) - 1) < 1e-2
+
 if __name__ == "__main__":
-    n = 100000000                    
+    n = 1000             
     '''é possível colocar um número muito alto aqui para comparar a velocidade das funções,
     no entanto, ter um número enorme de divisões não é prático, pois ainda que o usuário necessite de uma precisão enorme,
     o número obtido pela integral de simpson apenas com n= 1000 tem um erro de 6,8*10e-15,
@@ -88,7 +87,7 @@ if __name__ == "__main__":
     #print(integral_rect(math.sin, 0, math.pi, n))
     f = lambda x, y: math.sin(x)*math.cos(y)
     print(monteCarlo(0, math.pi/2, 0, math.pi/2, f, n))
-
-
+    
+    pytest.main(["-v", __file__])
 
 
