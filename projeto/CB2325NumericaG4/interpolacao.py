@@ -219,45 +219,199 @@ class Linear_Interp(InterpBase):
                   print(f"Erro ao salvar o gráfico: {e}")
         plt.show()
 
+class Hermite_Interp(InterpBase):
+
+    '''
+    Classe que cria um polinômio interpolador de Hermite a partir dos pontos dados, 
+    retornando o gráfico e quando definida e chamada com um argumento, retorna o valor do 
+    polinômio no valor do argumento.
+    '''
+
+    def __init__(self, x_points:list, y_points:list, dy_points:list):
+
+        '''
+        Args:
+            x_points: lista que representa as coordenadas x's dos pontos.
+            y_points: lista que representa as coordenadas y's dos pontos.
+            dy_points: lista que representa as derivadas nos pontos x's.
+        Return:
+            Quando somente inicializada, retorna: 
+            calcular_coef(): retorna uma lista com os coeficientes encontrados. 
+            grafico(): retorna um gráfico do polinômio interpolador e os pontos dados. 
+        '''
+        
+        super().__init__(x_points, y_points)
+        self.dy = np.array(dy_points)
+        if self.n != len(dy_points):
+            raise TypeError('x, y e dy não possuem o mesmo tamanho')
+        self.coeficientes = None
+        self.tabela = None 
+        self.calcular_coef()
+        
+    def calcular_coef(self):
+
+        ''' Calcula os coeficientes do polinômio interpolador de Hermite usando 
+        diferenças divididas.
+
+        A tabela de diferenças divididas é construída considerando que cada ponto x_i é repetido duas vezes para acomodar 
+        tanto o valor da função quanto o valor da derivada.   
+
+        Return:
+            Atualiza self.coeficientes com os coeficientes do polinômio de Hermite.
+        '''
+
+        self.tabela = np.zeros((2*self.n, 2*self.n))
+
+        for i in range(self.n):
+            self.tabela[2*i, 0] = self.y[i]
+            self.tabela[2*i + 1, 0] = self.y[i]
+            self.tabela[2*i, 1] = self.dy[i] 
+
+            print(self.tabela)
+            
+            if i < self.n - 1:
+                #diferença dividida do método de Newton para pontos distintos
+                self.tabela[2*i + 1, 1] = (self.y[i+1] - self.y[i]) / (self.x[i+1] - self.x[i])
+            else:
+                self.tabela[2*i + 1, 1] = self.dy[i]  
+
+        #adiciona os números na tabela
+        for j in range(2, 2*self.n):
+            for i in range(2*self.n - j):
+                numerador = self.tabela[i + 1, j - 1] - self.tabela[i, j - 1]
+                denominador = self.x[(i + j) // 2] - self.x[i // 2]  
+                if denominador == 0:
+                    # Para pontos duplicados, usa a derivada
+                    self.tabela[i, j] = self.dy[i // 2] / np.math.factorial(j)
+                else:
+                    self.tabela[i, j] = numerador / denominador
+        
+        # a primeira linha da tabela contém os coeficientes do polinômio
+        self.coeficientes = self.tabela[0, :]
+
+    def valor_polinomio(self, x_desejado):
+
+        ''' Avalia o polinômio interpolador de Hermite no ponto x_desejado.
+        Args:
+            x_desejado: valor ou array de valores onde o polinômio deve ser avaliado.
+        Return:
+            Valor do polinômio no(s) ponto(s) x_desejado.
+        '''
+
+
+        x_desejado = np.atleast_1d(x_desejado)
+
+        def evaluate_single_point(x_val):
+
+            ''' Avalia o polinômio em um único ponto x_val. 
+             Args:
+                x_val: valor onde o polinômio deve ser avaliado.
+             Return:
+                Valor do polinômio no ponto x_val.
+            '''
+            
+            resultado = self.coeficientes[0]
+            produto = 1.0
+            
+            for i in range(1, 2*self.n):
+                produto *= (x_val - self.x[(i-1) // 2])  
+                resultado += self.coeficientes[i] * produto
+            
+            return resultado
+
+        return np.array([evaluate_single_point(x_val) for x_val in x_desejado])
+    
+    def __call__(self, x_desejado):
+
+        ''' Permite chamar a instância da classe como uma função para avaliar o polinômio.
+        Args:
+            x_desejado: valor ou array de valores onde o polinômio deve ser avaliado.
+        Return:
+            Valor do polinômio no(s) ponto(s) x_desejado.
+        '''
+        
+        return self.valor_polinomio(x_desejado)
+    
+    def grafico(self):
+
+        ''' Plota o gráfico do polinômio interpolador de Hermite junto com os pontos dados.
+        Return:
+            Mostra o gráfico do polinômio e os pontos de interpolação.
+        '''
+        
+        x_min = np.min(self.x) - 1
+        x_max = np.max(self.x) + 1
+        x_vals = np.linspace(x_min, x_max, 400)
+        y_vals = self.valor_polinomio(x_vals)
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(x_vals, y_vals, label='Polinômio de Hermite', color='blue')
+        plt.scatter(self.x, self.y, color='red', label='Pontos dados')
+        plt.title('Interpolação de Hermite')
+        plt.xlabel('x')
+        plt.ylabel('H(x)')
+        plt.legend()
+        plt.grid()
+        plt.show()
+
 
 if __name__ == "__main__":
-  x_points = [1, 2, 3]
-  y_points = [1, 4, 9]
+    x_points = [1, 2, 3]
+    y_points = [1, 4, 9]
 
-  print("\n--- Testando Poly_Interp ---")
-  interp_poly = Poly_Interp(x_points, y_points)
+    #interpolação de newton
+    print("\n--- Testando Poly_Interp ---")
+    interp_poly = Poly_Interp(x_points, y_points)
 
-  print(f"Coeficientes do polinômio (b_0, b_1, ...): {interp_poly.coeficientes}")
-  # Testando o polinômio
-  print(f"Valor do polinômio em x=1: {interp_poly(1)}")
-  print(f"Valor do polinômio em x=2: {interp_poly(2)}")
-  print(f"Valor do polinômio em x=3: {interp_poly(3)}")
-  print(f"Valor do polinômio em x=2.3: {interp_poly(2.5)}")
-  print(interp_poly)
-  print(f"Valor em x=2.0: {interp_poly(2.0)}")
-  interp_poly.grafico()
+    print(f"Coeficientes do polinômio (b_0, b_1, ...): {interp_poly.coeficientes}")
+    # Testando o polinômio
+    print(f"Valor do polinômio em x=1: {interp_poly(1)}")
+    print(f"Valor do polinômio em x=2: {interp_poly(2)}")
+    print(f"Valor do polinômio em x=3: {interp_poly(3)}")
+    print(f"Valor do polinômio em x=2.3: {interp_poly(2.5)}")
+    print(interp_poly)
+    print(f"Valor em x=2.0: {interp_poly(2.0)}")
+    interp_poly.grafico()
 
+    #interpolação linear
+        
+    x_linear = [0, 1, 3, 4, 6]
+    y_linear = [0, 2, 1, 5, 4]
+
+    interp_linear = Linear_Interp(x_linear, y_linear)
+
+    print(interp_linear)
+
+    print(f"\nValor em x=0: {interp_linear(0)}")                          # Deve ser 0  (Testa interpolação em pontos conhecidos) 
+    print(f"Valor em x=3: {interp_linear(3)}")                            # Deve ser 1
+    print(f"Valor em x=6: {interp_linear(6)}")                            # Deve ser 4
+
+    print(f"\nValor em x=0.5: {interp_linear(0.5)}")                      # Pontos Intermediários
+    print(f"Valor em x=2.0: {interp_linear(2.0)}") 
+    print(f"Valor em x=5.0: {interp_linear(5.0)}") 
+
+    pontos_teste = np.array([0.0, 0.5, 1.0, 2.0, 3.0, 5.0, 6.0])          # Valores intermediários
+    valores_teste = interp_linear(pontos_teste)
+    print(f"\nValores para \n{pontos_teste}: \n{valores_teste}")
+
+    print(f"\nValor em x=-1.0 (extrapolação): {interp_linear(-1.0)}")     # Testa extrapolação
+    print(f"Valor em x=7.0 (extrapolação): {interp_linear(7.0)}")
+
+    interp_linear.grafico() ## Testa gráfico
+
+    #interpolação de hermite
     
-  x_linear = [0, 1, 3, 4, 6]
-  y_linear = [0, 2, 1, 5, 4]
+    print("\n--- Testando HermiteInterpolator ---")
+    x_hermite = [1, 2, 3]
+    y_hermite = [1, 4, 9]
+    dy_hermite = [2, 4, 6]  # Deriv
+    interp_hermite = Hermite_Interp(x_hermite, y_hermite, dy_hermite)
+    print(f"Coeficientes do polinômio (b_0, b_1, ...): {interp_hermite.coeficientes}")
+    # Testando o polinômio
+    print(f"Valor do polinômio em x=1: {interp_hermite(1)}")
+    print(f"Valor do polinômio em x=2: {interp_hermite(2)}")
+    print(f"Valor do polinômio em x=3: {interp_hermite(3)}")
+    print(f"Valor do polinômio em x=2.5: {interp_hermite(2.5)}")
+    interp_hermite.grafico()
 
-  interp_linear = Linear_Interp(x_linear, y_linear)
-
-  print(interp_linear)
-
-  print(f"\nValor em x=0: {interp_linear(0)}")                          # Deve ser 0  (Testa interpolação em pontos conhecidos) 
-  print(f"Valor em x=3: {interp_linear(3)}")                            # Deve ser 1
-  print(f"Valor em x=6: {interp_linear(6)}")                            # Deve ser 4
-
-  print(f"\nValor em x=0.5: {interp_linear(0.5)}")                      # Pontos Intermediários
-  print(f"Valor em x=2.0: {interp_linear(2.0)}") 
-  print(f"Valor em x=5.0: {interp_linear(5.0)}") 
-
-  pontos_teste = np.array([0.0, 0.5, 1.0, 2.0, 3.0, 5.0, 6.0])          # Valores intermediários
-  valores_teste = interp_linear(pontos_teste)
-  print(f"\nValores para \n{pontos_teste}: \n{valores_teste}")
-
-  print(f"\nValor em x=-1.0 (extrapolação): {interp_linear(-1.0)}")     # Testa extrapolação
-  print(f"Valor em x=7.0 (extrapolação): {interp_linear(7.0)}")
-
-  interp_linear.grafico() ## Testa gráfico
+        
