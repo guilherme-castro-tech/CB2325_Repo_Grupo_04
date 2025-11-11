@@ -150,11 +150,10 @@ class Linear_Interp(InterpBase):
         super().__init__(x, y)
 
     def __call__(self, x_desejado):
-        if isinstance(x_desejado, (int, float)):
+        if np.isscalar(x_desejado):
             return self._linear_interp_single(x_desejado)
-        else:
-           return np.array([self._linear_interp_single(x) for x in x_desejado])
-        
+        return np.array([self._linear_interp_single(x) for x in x_desejado])
+    
     def _linear_interp_single(self, x_est):
         '''
         Essa função gera uma interpolação linear por partes
