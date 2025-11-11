@@ -173,7 +173,7 @@ class Linear_Interp(InterpBase):
             y_est (float) ou (int) : ponto estimado
         '''
         if x_est<self.x[0] or x_est > self.x[-1]:
-           return None                        ## A maneira de tratar extrapolação aqui é retornar None.
+           return  np.nan                       ## A maneira de tratar extrapolação aqui é retornar NaN.
 
         for i in range(len(self.x)- 1):
            if self.x[i] <= x_est <= self.x[i+1]:
