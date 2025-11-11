@@ -78,9 +78,22 @@ def monteCarlo(a, b, c, d, funcao, n=1000):
 
     s = 0
     for i in range(n):
-        x = random.uniform(a, b)        #Escolhe a coordenada 
+        x = random.uniform(a, b)       
         y = random.uniform(c, d)
         s += funcao(x, y)
-    
     media = s/n
     return media*(b-a)*(d-c)
+
+if __name__ == "__main__":
+    n = 1000             
+    '''é possível colocar um número muito alto aqui para comparar a velocidade das funções,
+    no entanto, ter um número enorme de divisões não é prático, pois ainda que o usuário necessite de uma precisão enorme,
+    o número obtido pela integral de simpson apenas com n= 1000 tem um erro de 6,8*10e-15,
+    sendo que um número floating point do python não consegue representar um número muito menor que esse, então,
+    nesse ponto, a precisão não pode ficar maior.'''
+    
+    print(integral_trap(math.sin, 0, math.pi, n*3))         #n*3
+    print(integral_rect(math.sin, 0, math.pi, n)*6)         #n*6
+    print(integral_simpson(math.sin, 0, math.pi, n*2))      #n*2, as quantidades aqui são multiplicadas por 3, 6 e 2 para cancelar a diferença de velocidade entre elas, assim é possível comparar a precisão obtida por cada método depois de um mesmo período de tempo
+    f = lambda x, y: math.sin(x)*math.cos(y)
+    print(monteCarlo(0, math.pi/2, 0, math.pi/2, f, n))
