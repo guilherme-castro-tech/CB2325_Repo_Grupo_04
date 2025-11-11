@@ -1,8 +1,86 @@
-import math
-import math, random
+import random
+import matplotlib.pyplot as plt
+import numpy as np
 
-def integral_trap(funcao, a, b, n=1000):
 
+class IntegralNumerica:
+    """
+    Classe que representa uma integral numérica.
+
+    Propriedades:
+    func (Callable): A função integrada.
+    valor (float): O valor computado da integral numérica.
+    pontos (list[tuple]): Lista de pontos onde a função foi evaluada, na forma (x, f(x)).
+    """
+
+    def __init__(self, func, value, points):
+        """
+        Cria uma IntegralNumerica.
+
+        Parâmetros:
+        valor (float): O valor computado da integral numérica.
+        pontos (list[tuple]): Lista de pontos onde a função foi evaluada, na forma (x, f(x)). 
+        """
+        self.func = func
+        self.valor = value
+        self.pontos = points
+    
+    def __repr__(self):
+        return str(self.valor)
+    
+    def __getitem__(self, index):
+        return self.points[index]
+    
+
+class IntegralReal(IntegralNumerica):
+    """
+    Representa uma integral numérica de uma função cujo domínio é os reais.
+
+    Propriedades:
+    min (float): O valor mínimo do domínio.
+    max (float): O valor máximo do domínio.
+    """
+
+    def __init__(self, func, value, points, min, max):
+        self.min = min
+        self.max = max
+        super().__init__(func, value, points)
+    
+    def create_plot(self, color="#084b83"):
+        """
+        Cria e retorna objetos de plotagem do matplotlib para a integral.
+
+        Parâmetros:
+        color (str): A cor da função.
+
+        Retorna: tupla de objetos de figura e eixos do Matplotlib.
+        """
+        fig, ax = plt.subplots()
+        X = np.linspace(self.min, self.max, 500)
+        Y = self.func(X)
+        ax.plot(X, Y, color=color, label="Curva")
+        ax.set_xlabel('Eixo X')
+        ax.set_ylabel('Eixo Y')
+        ax.set_title(f'Área computada: {self.valor:.4}')
+        ax.grid(True)
+        return fig, ax
+    
+    def plot_points(self, ax, color="#c42021"):
+        """
+        Adiciona os pontos da integral ao plot especificado.
+
+        Parâmetros:
+        ax: Objeto de eixos do Matplotlib.
+        color (str): A cor dos pontos.
+        """
+        px, py = zip(*self.pontos)
+        marker, stemlines, baseline = ax.stem(px, py, "--", label = "Pontos")
+        plt.setp(marker, 'color', color)
+        plt.setp(stemlines, 'color', color)
+        plt.setp(baseline, 'color', color)
+
+
+def integral_trap(funcao, a, b, n=1000) -> IntegralReal:
     """
     Objetivos: - "Essa função calcula a integral numérica pelo método dos trapézios".   
 
@@ -12,14 +90,55 @@ def integral_trap(funcao, a, b, n=1000):
     b (float): Limite superior de integração;  
     n (int): Número de subdivisões.
 
-    Retorna: "(float) Valor aproximado  da integral definida da função entre os limites a e b"
+    Retorna: "(IntegralReal) Objeto representando o resultado da computação."
     """
 
     dx = (b-a)/n
     s = 0
+    p = []
     for c in range(n):
         s += (funcao(a + c*dx) + funcao(a + (c+1)*dx))*(dx/2)
-    return s
+        p.append((a + c*dx, funcao(a + c*dx)))
+    p.append((a + n*dx, funcao(a + n*dx)))
+    return IntegralReal(funcao, s, p, a, b)
+
+
+def plot_integral_trap(f, a, b, n=1000, simple=True, salvar_como=None) -> IntegralReal:
+    """
+    Calcula e plota a integral numérica pelo método dos trapézios.
+
+    Parâmetros:     
+    f: Função a ser integrada;  
+    a (float): Limite inferior de integração;
+    b (float): Limite superior de integração;  
+    n (int): Número de subdivisões.
+    simple (bool): Se o gráfico gerado é simples; ou seja, se os pontos onde a integral foi computada são omitidos.
+    salvar_como (str ou None): Caminho para salvar a image. Se None, apenas mostra o gráfico, sem salvar.
+
+    Retorna: "(IntegralReal) Objeto representando o resultado da computação."
+    """
+    Paleta = ["#084b83", "#680e4b", "#c42021", "#edae49"]
+    integral = integral_trap(f, a, b, n)
+
+    fig, ax = integral.create_plot(color = Paleta[0])
+    px, py = zip(*integral.pontos)
+    ax.plot(px, py, color = Paleta[1], label = "Aproximação")
+    ax.fill_between(px, py, color = Paleta[1], alpha = 0.2)
+
+    if not simple:
+        integral.plot_points(ax)
+
+    ax.legend()
+
+    if salvar_como:
+        try:
+            fig.savefig(salvar_como)
+            print(f"Gráfico salvo em: {salvar_como}")
+        except Exception as e:
+            print(f"Erro ao salvar o gráfico: {e}")
+
+    plt.show()
+    return integral
 
 
 def integral_rect(funcao, a, b, n=1000):
@@ -85,15 +204,6 @@ def monteCarlo(a, b, c, d, funcao, n=1000):
     return media*(b-a)*(d-c)
 
 if __name__ == "__main__":
-    n = 1000             
-    '''é possível colocar um número muito alto aqui para comparar a velocidade das funções,
-    no entanto, ter um número enorme de divisões não é prático, pois ainda que o usuário necessite de uma precisão enorme,
-    o número obtido pela integral de simpson apenas com n= 1000 tem um erro de 6,8*10e-15,
-    sendo que um número floating point do python não consegue representar um número muito menor que esse, então,
-    nesse ponto, a precisão não pode ficar maior.'''
-    
-    print(integral_trap(math.sin, 0, math.pi, n*3))         #n*3
-    print(integral_rect(math.sin, 0, math.pi, n)*6)         #n*6
-    print(integral_simpson(math.sin, 0, math.pi, n*2))      #n*2, as quantidades aqui são multiplicadas por 3, 6 e 2 para cancelar a diferença de velocidade entre elas, assim é possível comparar a precisão obtida por cada método depois de um mesmo período de tempo
-    f = lambda x, y: math.sin(x)*math.cos(y)
-    print(monteCarlo(0, math.pi/2, 0, math.pi/2, f, n))
+    print(plot_integral_trap(np.sin, 0, 5*np.pi))
+    print(plot_integral_trap(np.sin, 0, 5*np.pi, salvar_como="teste.png"))
+    print(plot_integral_trap(np.sin, 0, 5*np.pi, n=20, simple=False))
