@@ -84,37 +84,3 @@ def monteCarlo(a, b, c, d, funcao, n=1000):
     
     media = s/n
     return media*(b-a)*(d-c)
-
-
-def func_exemplo(a, b, c):  # Nome da função em letras minusculas utilizando snake_case
-    
-    """
-    (Objetivo da função) - "Essa função faz isso utilizando esse método".   
-
-    Parâmetros:     
-    a (Tipo do parâmetro): Descrição do parâmetro;  
-    b (Tipo do parâmetro): Descrição do parâmetro;  
-    c (Tipo do parâmetro): Descrição do parâmetro.
-
-    Retorna: "Aquilo que a função retorna"
-    """
-
-    return None
-
-def test_integral_trap():
-    assert abs(integral_trap(math.sin, 0, math.pi, 100000) - 2) < 1e-5
-    assert abs(integral_trap(lambda x: x**2, 0, 1, 100000) - (1/3)) < 1e-5
-
-def test_integral_rect():
-    assert abs(integral_rect(math.sin, 0, math.pi, 100000) - 2) < 1e-5
-    assert abs(integral_rect(lambda x: x**2, 0, 1, 100000) - (1/3)) < 1e-5
-
-def test_integral_simpson():
-    assert abs(integral_simpson(math.sin, 0, math.pi, 100000) - 2) < 1e-5
-    assert abs(integral_simpson(lambda x: x**2, 0, 1, 100000) - (1/3)) < 1e-5
-
-def test_monteCarlo():
-    f = lambda x, y: x*y
-    assert abs(monteCarlo(0, 1, 0, 1, f, 10000) - 0.25) < 1e-2
-    g = lambda x, y: math.sin(x)*math.cos(y)
-    assert abs(monteCarlo(0, math.pi/2, 0, math.pi/2, g, 10000) - 1) < 1e-2
