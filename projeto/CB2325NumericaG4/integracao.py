@@ -99,7 +99,7 @@ def integral_trap(funcao, a, b, n=1000) -> IntegralReal:
     for c in range(n):
         s += (funcao(a + c*dx) + funcao(a + (c+1)*dx))*(dx/2)
         p.append((a + c*dx, funcao(a + c*dx)))
-    p.append((a + n*dx, funcao(a + n*dx)))
+    p.append((b, funcao(b)))
     return IntegralReal(funcao, s, p, a, b)
 
 
@@ -141,7 +141,7 @@ def plot_integral_trap(f, a, b, n=1000, simple=True, salvar_como=None) -> Integr
     return integral
 
 
-def integral_rect(funcao, a, b, n=1000):
+def integral_rect(funcao, a, b, n=1000) -> IntegralReal:
 
     """
     Objetivos: - "Essa função calcula a integral numérica por retângulos".   
@@ -152,14 +152,64 @@ def integral_rect(funcao, a, b, n=1000):
     b (float): Limite superior de integração;  
     n (int): Número de subdivisões.
 
-    Retorna: "(float) Valor aproximado  da integral definida da função entre os limites a e b"
+    Retorna: "(IntegralReal) Objeto representando o resultado da computação."
     """
 
     dx = (b-a)/n    
     s = 0
+    p = []
     for c in range(n):
         s += (funcao(a + c*dx))*dx
-    return s
+        p.append((a + c*dx, funcao(a + c*dx)))
+    p.append((b, funcao(b)))
+    return IntegralReal(funcao, s, p, a, b)
+
+
+def plot_integral_rect(f, a, b, n=1000, simple=True, salvar_como=None) -> IntegralReal:
+    """
+    Calcula e plota a integral numérica pelo método dos retângulos.
+
+    Parâmetros:     
+    f: Função a ser integrada;  
+    a (float): Limite inferior de integração;
+    b (float): Limite superior de integração;  
+    n (int): Número de subdivisões.
+    simple (bool): Se o gráfico gerado é simples; ou seja, se os pontos onde a integral foi computada são omitidos.
+    salvar_como (str ou None): Caminho para salvar a image. Se None, apenas mostra o gráfico, sem salvar.
+
+    Retorna: "(IntegralReal) Objeto representando o resultado da computação."
+    """
+    Paleta = ["#084b83", "#680e4b", "#c42021", "#edae49"]
+    integral = integral_rect(f, a, b, n)
+
+    fig, ax = integral.create_plot(color = Paleta[0])
+    dpx, dpy = [a], [0]
+    for i in range(len(integral.pontos) - 1):
+        # Para que o Matplotlib interprete nossos pontos como uma função escada,
+        # para cada xi != b computado pelo método adicionamos os pontos
+        # (xi, f(xi)) e (x(i + 1), f(xi)) ao nosso array.
+        dpx += [integral.pontos[i][0], integral.pontos[i + 1][0]]
+        dpy += [integral.pontos[i][1], integral.pontos[i][1]]
+    dpx += [b]
+    dpy += [0]
+    ax.plot(dpx, dpy, color = Paleta[1], label = "Aproximação")
+    ax.fill_between(dpx, dpy, color = Paleta[1], alpha = 0.2)
+
+    if not simple:
+        integral.plot_points(ax)
+
+    ax.legend()
+
+    if salvar_como:
+        try:
+            fig.savefig(salvar_como)
+            print(f"Gráfico salvo em: {salvar_como}")
+        except Exception as e:
+            print(f"Erro ao salvar o gráfico: {e}")
+
+    plt.show()
+    return integral
+
 
 def integral_simpson(funcao, a, b, n=1000):
 
@@ -180,7 +230,8 @@ def integral_simpson(funcao, a, b, n=1000):
     for c in range(n):
         s += (funcao(a + c*dx) + 4 * funcao((a + a + c * dx + (c+1) * dx)/2) + funcao(a + (c+1)*dx))*(dx/6)         #Calcula as aproximações
     return s
-    
+
+
 def monteCarlo(a, b, c, d, funcao, n=1000):
 
     """
@@ -203,7 +254,9 @@ def monteCarlo(a, b, c, d, funcao, n=1000):
     media = s/n
     return media*(b-a)*(d-c)
 
+
 if __name__ == "__main__":
-    print(plot_integral_trap(np.sin, 0, 5*np.pi))
-    print(plot_integral_trap(np.sin, 0, 5*np.pi, salvar_como="teste.png"))
-    print(plot_integral_trap(np.sin, 0, 5*np.pi, n=20, simple=False))
+    print(plot_integral_rect(np.cos, 0, 5*np.pi))
+    #print(plot_integral_trap(np.sin, 0, 5*np.pi, salvar_como="teste.png"))
+    print(plot_integral_trap(np.cos, 0, 5*np.pi, n=20, simple=False))
+    print(plot_integral_rect(np.cos, 0, 5*np.pi, n=20, simple=False))
