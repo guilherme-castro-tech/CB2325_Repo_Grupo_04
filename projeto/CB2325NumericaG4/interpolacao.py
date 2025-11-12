@@ -5,9 +5,9 @@ from utils import InterpBase
 
 class Poly_Interp(InterpBase):
     '''
-      Classe que cria um polinômio interpolador a partir de nós de Chebyshev pelo
-      método de Newton, retornando o gráfico e, quando definida e chamada com um
-      argumento, retorna o valor do polinômio no x dado.
+      Classe que cria um polinômio interpolador pelo método de Newton, 
+      retornando o gráfico e, quando definida e chamada com um argumento,
+      retorna o valor do polinômio no x dado.
 
       Args:
           x: lista que representa as coordenadas x's dos pontos.
@@ -20,105 +20,100 @@ class Poly_Interp(InterpBase):
     '''
 
     def __init__(self, x:list, y:list):
-      super().__init__(x, y) 
-      
+      super().__init__(x, y)
+
       self.coeficientes = None
-      self.tabela = None
       self.calcular_coef()
 
     def calcular_coef(self):
-        """
-        Calcula os coeficientes do polinômio interpolador pelo
-        método de Newton.
+      """
+      Esta função calcula os coeficientes do polinômio interpolador
+      utilizando o método de Newton (diferenças divididas) e atualizando
+      o objeto da classe 'self.coeficientes'.
+      """
+      tabela = np.zeros((self.n, self.n))
+      tabela[:,0] = self.y
 
-        Args:
-          None.
-
-        Returns:
-            np.array: Retorna os coeficientes em ordem crescente.
-        """
-        self.tabela = np.zeros((self.n, self.n))
-        self.tabela[:,0] = self.y # Usa self.y_nodes da classe base
-
-        for j in range(1, self.n):
-            for i in range(self.n - j):
-                numerador = self.tabela[i+1, j-1] - self.tabela[i, j-1]
-                denominador = self.x[i+j] - self.x[i] # Usa self.x_nodes
-                if denominador == 0:
-                    raise ZeroDivisionError('Há dois pontos com a mesma coordenada x.')
-                self.tabela[i, j] = numerador / denominador
-        self.coeficientes = self.tabela[0,:]
+      for j in range(1, self.n):
+          for i in range(self.n - j):
+              numerador = tabela[i+1, j-1] - tabela[i, j-1]
+              denominador = self.x[i+j] - self.x[i]
+              if denominador == 0:
+                  raise ZeroDivisionError('Há dois pontos com a mesma coordenada x.')
+              tabela[i, j] = numerador / denominador
+      self.coeficientes = tabela[0,:]
 
     def __call__(self, x_desejado):
         """
-        Permite a classe ser chamada como uma função, retornando
-        o valor do polinômio interpolador no x desejado.
+        Esta função permite a classe ser chamada como o
+        polinômio interpolador, retornando seu valor no
+        x desejado.
 
-        Args:
-          x_desejado: Pode ser somente um ponto ou um Array de
-          pontos.
+        Parâmetros:
+        x_desejado (float, int ou list): Coordenada(s) x('s) que
+        queremos avaliar.
 
-        Returns:
-            float: Caso a entrada seja um só ponto.
-            np.array: Caso a entrada seja um Array.
+        Retorna: Um Array com os valores do polinômio interpolador.
+
         """
+        # Transforma a entrada em Numpy Array
         x_desejado = np.atleast_1d(x_desejado)
-        
+
         def func_valor(x_val):
-            resultado = self.coeficientes[self.n - 1]
-            for i in range(self.n - 2, -1, -1):
-                resultado = self.coeficientes[i] + (x_val - self.x[i]) * resultado
-            return resultado
-        
+          """
+          Esta função calcula o valor do polinômio interpolador
+          para um dado x pelo método de Horner.
+
+          Parâmetros:
+          x_val (float): coordenada x.
+
+          Retorna: Um float com o valor de x no polinômio interpolador.
+
+          """
+          resultado = self.coeficientes[self.n - 1]
+          for i in range(self.n - 2, -1, -1):
+              resultado = self.coeficientes[i] + (x_val - self.x[i]) * resultado
+          return resultado
+
         valores = np.array([func_valor(x_val) for x_val in x_desejado])
-        
+
+        # Se for somente um ponto, passa o Array para um float ou int
         if isinstance(x_desejado, (int, float)):
             return valores.item()
         return valores
-    
-    def nos_de_chebyshev(self):
+
+
+    def erro(self, func_original, pontos):
         """
-        Calcula os nós de Chebyshev do primeiro tipo no intervalo
-        dos pontos x's dados à classe.
+        Esta função calcula o erro absoluto entre o polinômio atual e uma 
+        função verdadeira em uma lista de pontos de teste.
 
-        Args:
-          None.
+        Parâmetros:
+        func_original (function): Função original com a qual queremos comparar;
+        pontos (int, float ou list): Ponto(s) para calculo de erro.
 
-        Returns:
-            nos: Um array dos nós de Chebyshev no intervalo.
+        Retorna: Um Array com o(s) erro(s).
+
         """
-        k = np.arange(self.n)
-        x_cheb= np.cos((2 * k + 1) * np.pi / (2 * self.n))
-        nos = ((self.x[-1] - self.x[0]) / 2) * x_cheb + (self.x[0]+self.x[-1])/2
-        return nos
-
-    def erro(self, true_function, test_points: list) -> np.ndarray:
-        """
-        Calcula o erro absoluto entre o polinômio atual e uma função verdadeira
-        em uma lista de pontos de teste.
-
-        Args:
-            true_function (callable): A função verdadeira para comparação.
-            test_points (list): Uma lista de pontos onde o erro será calculado.
-
-        Returns:
-            np.ndarray: Um array contendo os erros absolutos em cada ponto de teste.
-        """
-        test_points = np.atleast_1d(test_points)
+        lista_pontos = np.atleast_1d(pontos)
         errors = []
-        for p in test_points:
-            error_val = np.abs(self(p) - true_function(p))
-            errors.append(error_val)
+        for p in pontos:
+            erros_val = np.abs(self(p) - func_original(p))
+            errors.append(erros_val)
         return np.array(errors).flatten()
+
 
     def grafico(self, salvar_como = None):
         """
-        Cria um gráfico com o polinômio interpolador e os pontos dados.
+        Esta função gera o gráfico com os pontos dados e seu polinômio
+        interpolador.
 
-        Args:
-          salvar_como: diretório em que o gráfico deverá ser salvo.
-        Returns:
-            gráfico.
+        Parâmetros:
+        salvar_como (string)(opcional): Nome do diretório em que o usuário deseja
+        salvar o gráfico.
+
+        Retorna: Retorna um gráfico.
+
         """
         curva_x = np.linspace(self.domain.min, self.domain.max, max(500, 10 * self.n))
         y_interp = self(curva_x)
@@ -126,24 +121,27 @@ class Poly_Interp(InterpBase):
         fig, ax = self.plot()
 
         fig.suptitle('Interpolação Polinomial')
-        ax.plot(curva_x, y_interp, color='blue', linestyle='-', label='Interpolação Polinomial por Newton')
-        ax.scatter(self.x, self.y, color='red', marker='o', zorder=5, label='Pontos de Interpolação')
+        ax.plot(curva_x, y_interp, color='#084b83', linestyle='-', label='Interpolação Polinomial por Newton')
+        ax.scatter(self.x, self.y, color='#c42021', marker='o', zorder=5, label='Pontos de Interpolação')
         ax.legend(loc='upper left')
-        if salvar_como:
-                try:
-                    fig.savefig(salvar_como)
-                    print(f"Gráfico salvo em: {salvar_como}")
-                except Exception as e:
-                    print(f"Erro ao salvar o gráfico: {e}")
+        plt.xlabel('Eixo X')
+        plt.ylabel('Eixo Y')
+        plt.grid(True)
         plt.show()
+        if salvar_como:
+              try:
+                  fig.savefig(salvar_como)
+                  print(f"Gráfico salvo em: {salvar_como}")
+              except Exception as e:
+                  print(f"Erro ao salvar o gráfico: {e}")
 
     def __repr__(self):
         '''
         Retorna a representação do objeto
         de Interpolação bem como os coeficientes do polinômio.
         '''
-        # Simplificando a representação para evitar complexidade na geração do polinômio em string
         return f'Poly_Interp(Grau={self.n-1}) \n\tx={self.x}, \n\ty={self.y} \n\tCoeficientes={self.coeficientes})'
+
 
 class Linear_Interp(InterpBase):
     def __init__(self, x, y):
