@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+Paleta = ["#084b83", "#680e4b", "#c42021", "#edae49"]
+
+
 class IntegralNumerica:
     """
     Classe que representa uma integral numérica.
@@ -46,7 +49,7 @@ class IntegralReal(IntegralNumerica):
         self.max = max
         super().__init__(func, value, points)
     
-    def create_plot(self, color="#084b83"):
+    def create_plot(self, color=Paleta[0]):
         """
         Cria e retorna objetos de plotagem do matplotlib para a integral.
 
@@ -65,7 +68,7 @@ class IntegralReal(IntegralNumerica):
         ax.grid(True)
         return fig, ax
     
-    def plot_points(self, ax, color="#c42021"):
+    def plot_points(self, ax, color=Paleta[2]):
         """
         Adiciona os pontos da integral ao plot especificado.
 
@@ -120,7 +123,7 @@ def plot_integral_trap(f, a, b, n=1000, simple=True, salvar_como=None) -> Integr
     Paleta = ["#084b83", "#680e4b", "#c42021", "#edae49"]
     integral = integral_trap(f, a, b, n)
 
-    fig, ax = integral.create_plot(color = Paleta[0])
+    fig, ax = integral.create_plot()
     px, py = zip(*integral.pontos)
     ax.plot(px, py, color = Paleta[1], label = "Aproximação")
     ax.fill_between(px, py, color = Paleta[1], alpha = 0.2)
@@ -182,7 +185,7 @@ def plot_integral_rect(f, a, b, n=1000, simple=True, salvar_como=None) -> Integr
     Paleta = ["#084b83", "#680e4b", "#c42021", "#edae49"]
     integral = integral_rect(f, a, b, n)
 
-    fig, ax = integral.create_plot(color = Paleta[0])
+    fig, ax = integral.create_plot()
     dpx, dpy = [a], [0]
     for i in range(len(integral.pontos) - 1):
         # Para que o Matplotlib interprete nossos pontos como uma função escada,
@@ -211,8 +214,7 @@ def plot_integral_rect(f, a, b, n=1000, simple=True, salvar_como=None) -> Integr
     return integral
 
 
-def integral_simpson(funcao, a, b, n=1000):
-
+def integral_simpson(funcao, a, b, n=1000) -> IntegralReal:
     """
     Objetivos: - "Essa função calcula a integral numérica pelo método de Simpson".   
 
@@ -222,14 +224,79 @@ def integral_simpson(funcao, a, b, n=1000):
     b (float): Limite superior de integração;  
     n (int): Número de subdivisões.
 
-    Retorna: "(float) Valor aproximado  da integral definida da função entre os limites a e b"
+    Retorna: "(IntegralReal) Objeto representando o resultado da computação."
     """
 
     dx = (b-a)/n    
     s = 0
+    p = []
     for c in range(n):
         s += (funcao(a + c*dx) + 4 * funcao((a + a + c * dx + (c+1) * dx)/2) + funcao(a + (c+1)*dx))*(dx/6)         #Calcula as aproximações
-    return s
+        p += [
+            (a + c*dx, funcao(a + c*dx)),
+            ((a + a + c * dx + (c+1) * dx)/2, funcao((a + a + c * dx + (c+1) * dx)/2))
+        ]
+    p.append((b, funcao(b)))
+    return IntegralReal(funcao, s, p, a, b)
+
+
+def plot_integral_simpson(f, a, b, n=1000, simple=True, salvar_como=None) -> IntegralReal:
+    """
+    Calcula e plota a integral numérica pelo método de Simpson.
+
+    Parâmetros:     
+    f: Função a ser integrada;  
+    a (float): Limite inferior de integração;
+    b (float): Limite superior de integração;  
+    n (int): Número de subdivisões.
+    simple (bool): Se o gráfico gerado é simples; ou seja, se os pontos onde a integral foi computada são omitidos.
+    salvar_como (str ou None): Caminho para salvar a image. Se None, apenas mostra o gráfico, sem salvar.
+
+    Retorna: "(IntegralReal) Objeto representando o resultado da computação."
+    """
+    integral = integral_simpson(f, a, b, n)
+
+    def p2(x0, x1, x2, y0, y1, y2):
+        L0x = lambda x: ((x - x1) * (x - x2)) / ((x0 - x1) * (x0 - x2))
+        L1x = lambda x: ((x - x0) * (x - x2)) / ((x1 - x0) * (x1 - x2))
+        L2x = lambda x: ((x - x0) * (x - x1)) / ((x2 - x0) * (x2 - x1))
+        return lambda x: y0*L0x(x) + y1*L1x(x) + y2*L2x(x)
+
+    fig, ax = integral.create_plot()
+    lenp = len(integral.pontos) - 1 # "Distância" (em número de intervalos) entre o primeiro e último ponto no eixo x.
+    factor = 50
+    X = np.linspace(integral.min, integral.max, lenp * factor)
+    Y = np.array([])
+    for i in range(0, lenp - 1, 2):
+        poly = p2(
+            integral.pontos[i][0],
+            integral.pontos[i + 1][0],
+            integral.pontos[i + 2][0],
+            integral.pontos[i][1],
+            integral.pontos[i + 1][1],
+            integral.pontos[i + 2][1],
+        )
+        Y = np.concatenate((
+            Y, 
+            poly(np.linspace(integral.pontos[i][0], integral.pontos[i + 2][0], 2 * factor)),
+        ))
+    ax.plot(X, Y, color = Paleta[1], label = "Aproximação")
+    ax.fill_between(X, Y, color = Paleta[1], alpha = 0.2)
+
+    if not simple:
+        integral.plot_points(ax)
+
+    ax.legend()
+
+    if salvar_como:
+        try:
+            fig.savefig(salvar_como)
+            print(f"Gráfico salvo em: {salvar_como}")
+        except Exception as e:
+            print(f"Erro ao salvar o gráfico: {e}")
+
+    plt.show()
+    return integral
 
 
 def monteCarlo(a, b, c, d, funcao, n=1000):
@@ -256,7 +323,7 @@ def monteCarlo(a, b, c, d, funcao, n=1000):
 
 
 if __name__ == "__main__":
-    print(plot_integral_rect(np.cos, 0, 5*np.pi))
-    #print(plot_integral_trap(np.sin, 0, 5*np.pi, salvar_como="teste.png"))
-    print(plot_integral_trap(np.cos, 0, 5*np.pi, n=20, simple=False))
-    print(plot_integral_rect(np.cos, 0, 5*np.pi, n=20, simple=False))
+    print(plot_integral_rect(np.cos, 0, 4.5 * np.pi, n=40, simple=False))
+    print(plot_integral_trap(np.cos, 0, 4.5 * np.pi, n=40, simple=False))
+    print(plot_integral_simpson(np.cos, 0, 4.5 * np.pi, n=20, simple=False))
+    print(plot_integral_simpson(np.cos, 0, 4.5 * np.pi, n=1000))
