@@ -300,17 +300,18 @@ def plot_integral_simpson(f, a, b, n=1000, simple=True, salvar_como=None) -> Int
 
 
 def monteCarlo(a, b, c, d, funcao, n=1000):
-
     """
-    Objetivos: - "Essa função calcula a integral numérica pelo método de Monte Carlo".   
+    Objetivos: - "Essa função calcula a integral numérica de uma função f : R² -> R pelo método de Monte Carlo."
 
     Parâmetros:     
     funcao: Função a ser integrada;  
-    a (float): Limite inferior de integração;
-    b (float): Limite superior de integração;  
-    n (int): Número de subdivisões.
+    a (float): Limite inferior de integração na 1ª dimensão;
+    b (float): Limite superior de integração na 1ª dimensão;
+    c (float): Limite inferior de integração na 2ª dimensão;
+    d (float): Limite superior de integração na 2ª dimensão;
+    n (int): Número de repetições do experimento.
 
-    Retorna: "(float) Valor aproximado  da integral definida da função entre os limites a e b"
+    Retorna: "(float) Valor aproximado da integral definida da função no quadrado especificado"
     """
 
     s = 0
