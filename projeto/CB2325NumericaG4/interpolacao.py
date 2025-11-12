@@ -4,11 +4,6 @@ import matplotlib.pyplot as plt
 from typing import List
 from utils import InterpBase
 
-import numpy as np
-import matplotlib.pyplot as plt
-from typing import List
-from utils import InterpBase
-
 class Poly_Interp(InterpBase):
     '''
       Classe que cria um polinômio interpolador pelo método de Newton, 
@@ -317,7 +312,7 @@ if __name__ == "__main__":
     x_points = [1, 2, 3]
     y_points = [1, 4, 9]
 
-    #interpolação de newton
+    #interpolação polinomial
     print("\n--- Testando Poly_Interp ---")
     interp_poly = Poly_Interp(x_points, y_points)
 
@@ -371,10 +366,4 @@ if __name__ == "__main__":
     print(f"Valor do polinômio em x=3: {interp_hermite(3)}")
     print(f"Valor do polinômio em x=2.5: {interp_hermite(2.5)}")
     interp_hermite.grafico()
-    x_test = [1.0, 1.5, 2.0, 2.5, 3.0]
-    for x in x_test:
-        resultado = interp_hermite(x)
-        esperado = x**2
-    print(f"H({x}) = {resultado} | Esperado: {esperado} | Correto? {abs(resultado-esperado) < 0.001}")
-
         
