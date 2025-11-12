@@ -1,4 +1,10 @@
 import numpy as np
+import math
+import matplotlib.pyplot as plt
+from typing import List
+from utils import InterpBase
+
+import numpy as np
 import matplotlib.pyplot as plt
 from typing import List
 from utils import InterpBase
@@ -103,45 +109,23 @@ class Poly_Interp(InterpBase):
         return np.array(errors).flatten()
 
 
-    def grafico(self, salvar_como = None):
-        """
-        Esta função gera o gráfico com os pontos dados e seu polinômio
-        interpolador.
-
-        Parâmetros:
-        salvar_como (string)(opcional): Nome do diretório em que o usuário deseja
-        salvar o gráfico.
-
-        Retorna: Retorna um gráfico.
-
-        """
-        curva_x = np.linspace(self.domain.min, self.domain.max, max(500, 10 * self.n))
-        y_interp = self(curva_x)
-
-        fig, ax = self.plot()
-
-        fig.suptitle('Interpolação Polinomial')
-        ax.plot(curva_x, y_interp, color='#084b83', linestyle='-', label='Interpolação Polinomial por Newton')
-        ax.scatter(self.x, self.y, color='#c42021', marker='o', zorder=5, label='Pontos de Interpolação')
-        ax.legend(loc='upper left')
-        plt.xlabel('Eixo X')
-        plt.ylabel('Eixo Y')
-        plt.grid(True)
-        plt.show()
-        if salvar_como:
-              try:
-                  fig.savefig(salvar_como)
-                  print(f"Gráfico salvo em: {salvar_como}")
-              except Exception as e:
-                  print(f"Erro ao salvar o gráfico: {e}")
-
     def __repr__(self):
         '''
         Retorna a representação do objeto
         de Interpolação bem como os coeficientes do polinômio.
         '''
         return f'Poly_Interp(Grau={self.n-1}) \n\tx={self.x}, \n\ty={self.y} \n\tCoeficientes={self.coeficientes})'
+    
 
+    def grafico(self):
+        ''' a partir de INterpBase.grafico(), cria um gráfico com o polinômio interpolador e os pontos dados.
+        
+        Returns:
+            Mostra o gráfico do polinômio e os pontos de interpolação.
+        '''
+        return super().grafico()
+
+    
 
 class Linear_Interp(InterpBase):
     def __init__(self, x, y):
@@ -195,27 +179,7 @@ class Linear_Interp(InterpBase):
         """
         Cria um gráfico com a interpolação linear e os pontos dados.
         """
-        curva_x = np.linspace(self.domain.min, self.domain.max, max(500, 10 * self.n))
-        
-        fig, ax1 = plt.subplots(figsize=(10, 6))
-        ax1.set_xlabel('Eixo X')
-        ax1.set_ylabel('Valor de Interpolação', color='blue')
-        ax1.tick_params(axis='y', labelcolor='blue')
-        ax1.grid(True)
-
-        y_interp = self(curva_x)
-        
-        fig.suptitle('Interpolação Linear por Partes')
-        ax1.plot(curva_x, y_interp, color='blue', linestyle='-', label='Interpolação Linear')
-        ax1.scatter(self.x, self.y, color='red', marker='o', zorder=5, label='Pontos de Interpolação')
-        ax1.legend(loc='upper left')
-        if salvar_como:
-              try:
-                  plt.savefig(salvar_como)
-                  print(f"Gráfico salvo em: {salvar_como}")
-              except Exception as e:
-                  print(f"Erro ao salvar o gráfico: {e}")
-        plt.show()
+        return super().grafico()
 
 class Hermite_Interp(InterpBase):
 
@@ -280,9 +244,10 @@ class Hermite_Interp(InterpBase):
                 denominador = self.x[(i + j) // 2] - self.x[i // 2]  
                 if denominador == 0:
                     # Para pontos duplicados, usa a derivada
-                    self.tabela[i, j] = self.dy[i // 2] / np.math.factorial(j)
+                    self.tabela[i, j] = self.dy[i // 2] / math.factorial(j)
                 else:
                     self.tabela[i, j] = numerador / denominador
+                    
         
         # a primeira linha da tabela contém os coeficientes do polinômio
         self.coeficientes = self.tabela[0, :]
@@ -319,38 +284,33 @@ class Hermite_Interp(InterpBase):
 
         return np.array([evaluate_single_point(x_val) for x_val in x_desejado])
     
-    def __call__(self, x_desejado):
-
-        ''' Permite chamar a instância da classe como uma função para avaliar o polinômio.
-        Args:
-            x_desejado: valor ou array de valores onde o polinômio deve ser avaliado.
-        Return:
-            Valor do polinômio no(s) ponto(s) x_desejado.
-        '''
-        
-        return self.valor_polinomio(x_desejado)
     
-    def grafico(self):
-
-        ''' Plota o gráfico do polinômio interpolador de Hermite junto com os pontos dados.
-        Return:
-            Mostra o gráfico do polinômio e os pontos de interpolação.
-        '''
+    def __call__(self, x_desejado):
+        """
+        Avalia o polinômio com verificação de extrapolação.
+        Retorna None para pontos fora do intervalo [min(x), max(x)].
+        """
+        # Verifica se é extrapolação
+        if np.isscalar(x_desejado):
+            # Para um único valor
+            if x_desejado < np.min(self.x) or x_desejado > np.max(self.x):
+                return None
+        else:
+            # Para arrays/listas
+            x_desejado = np.asarray(x_desejado)
+            if np.any(x_desejado < np.min(self.x)) or np.any(x_desejado > np.max(self.x)):
+                # Se algum ponto estiver fora, retorna None
+                return None
         
-        x_min = np.min(self.x) - 1
-        x_max = np.max(self.x) + 1
-        x_vals = np.linspace(x_min, x_max, 400)
-        y_vals = self.valor_polinomio(x_vals)
+        # Se não é extrapolação, calcula normalmente
+        return self.valor_polinomio(x_desejado)
+        
+    def grafico(self, salvar_como = None):
 
-        plt.figure(figsize=(10, 6))
-        plt.plot(x_vals, y_vals, label='Polinômio de Hermite', color='blue')
-        plt.scatter(self.x, self.y, color='red', label='Pontos dados')
-        plt.title('Interpolação de Hermite')
-        plt.xlabel('x')
-        plt.ylabel('H(x)')
-        plt.legend()
-        plt.grid()
-        plt.show()
+        """
+        Cria um gráfico com a interpolação linear e os pontos dados.
+        """
+        return super().grafico()
 
 
 if __name__ == "__main__":
@@ -367,9 +327,9 @@ if __name__ == "__main__":
     print(f"Valor do polinômio em x=2: {interp_poly(2)}")
     print(f"Valor do polinômio em x=3: {interp_poly(3)}")
     print(f"Valor do polinômio em x=2.3: {interp_poly(2.5)}")
-    print(interp_poly)
+    print(interp_poly.grafico())
     print(f"Valor em x=2.0: {interp_poly(2.0)}")
-    interp_poly.grafico()
+    #interp = interp_poly()
 
     #interpolação linear
         
@@ -401,8 +361,8 @@ if __name__ == "__main__":
     
     print("\n--- Testando HermiteInterpolator ---")
     x_hermite = [1, 2, 3]
-    y_hermite = [1, 4, 9]
-    dy_hermite = [2, 4, 6]  # Deriv
+    y_hermite = [1, 8, 27]
+    dy_hermite = [3, 6, 9]  # Deriv
     interp_hermite = Hermite_Interp(x_hermite, y_hermite, dy_hermite)
     print(f"Coeficientes do polinômio (b_0, b_1, ...): {interp_hermite.coeficientes}")
     # Testando o polinômio
@@ -411,5 +371,10 @@ if __name__ == "__main__":
     print(f"Valor do polinômio em x=3: {interp_hermite(3)}")
     print(f"Valor do polinômio em x=2.5: {interp_hermite(2.5)}")
     interp_hermite.grafico()
+    x_test = [1.0, 1.5, 2.0, 2.5, 3.0]
+    for x in x_test:
+        resultado = interp_hermite(x)
+        esperado = x**2
+    print(f"H({x}) = {resultado} | Esperado: {esperado} | Correto? {abs(resultado-esperado) < 0.001}")
 
         
