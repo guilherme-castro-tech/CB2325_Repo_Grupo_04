@@ -113,5 +113,55 @@ class InterpBase(RealFunction):
         ax.legend()
         plt.show()
 
-        
+    def grafico(self, salvar_como = None):
+        """
+        Cria um gráfico com o interpolador e os pontos dados.
+        """
+        curva_x = np.linspace(self.domain.min, self.domain.max, max(500, 10 * self.n))
 
+        # Para Hermite, use valor_polinomio diretamente
+        if hasattr(self, 'dy') and self.dy is not None:
+            # É uma interpolação de Hermite
+            y_interp = self.valor_polinomio(curva_x)
+        else:
+            # Para outras interpolações, use o método padrão
+            try:
+                y_interp = self(curva_x)  # Tenta usar __call__
+            except (AttributeError, TypeError):
+                try:
+                    y_interp = self.valor_polinomio(curva_x)
+                except AttributeError:
+                    y_interp = np.array([self(x) for x in curva_x])
+                    
+        
+        curva_x = np.linspace(self.domain.min, self.domain.max, max(500, 10 * self.n))
+        y_interp = self(curva_x)
+
+        fig, ax = plt.subplots()
+
+        # Plota a curva interpolada
+        ax.plot(curva_x, y_interp, color='#084b83', linestyle='-', 
+                label=f'{self.__class__.__name__}')
+
+        # Plota os pontos de interpolação
+        ax.scatter(self.x, self.y, color='#c42021', marker='o', zorder=5, 
+                  label='Pontos de Interpolação')
+
+        # Se for Hermite, plota também as derivadas
+        if hasattr(self, 'dy') and self.dy is not None:
+            # Adiciona informações sobre as derivadas no título
+            ax.set_title(f'{self.__class__.__name__} - Com derivadas', fontsize=14)
+        else:
+            ax.set_title(f'{self.__class__.__name__}', fontsize=14)
+
+        ax.legend(loc='upper left')
+        plt.xlabel('Eixo X')
+        plt.ylabel('Eixo Y')
+        ax.grid(True)
+        plt.show()
+        if salvar_como:
+              try:
+                  fig.savefig(salvar_como)
+                  print(f"Gráfico salvo em: {salvar_como}")
+              except Exception as e:
+                  print(f"Erro ao salvar o gráfico: {e}")
