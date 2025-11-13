@@ -12,7 +12,7 @@ def derivada(f, x, h=1e-6):
         
     Parâmetros: 
         f (função): função contínua;
-        x (float): ponto oem que a derivada será calculada;
+        x (float): ponto em que a derivada será calculada;
         h (float): precisão.
 
     Retorna: Valor aproximado da derivada de f(x) no ponto x (float).
@@ -66,7 +66,77 @@ def metodo_da_bissecao(f, a: float, b: float, tol=1e-6):
     return raiz, aproximacoes
 
 def metodo_da_secante(f, a, b, tol):
-    return "Em andamento"
+    """
+    Função que determina uma raiz real de f(x) no intervalo [a, b] pelo método da Secante.
+    
+    Parâmetros: 
+        f (função): função contínua;
+        a, b (float): extremos do intervalo [a, b];
+        tol (float): precisão.
+
+    Retorna: Valor aproximado da raiz de f(x), com precisão 10⁻⁶ (float), e lista de aproximações. 
+    Retorna (None, []) se não tiver raiz ou se não conseguir encontrar por esse método.
+    """
+    
+    # Inicializa xn como o extremo inicial do intervalo 'a'.
+    xo = a
+    xn = b
+	
+	# Condição para do loop (while).
+    passo = False
+
+	# Cria uma lista, originalmente vazia, para adicionar posteriormente os pontos percorridos 
+    # durante a aproximação.
+    aprox = [xo]
+	
+	# Inicializa a variável raiz.
+    raiz = None
+
+    while passo == False:
+        # Verifica se 'a' (extremo inicial do intervalo) é uma raiz.
+    
+        if abs(f(a)) <= tol:
+            raiz = a
+            passo = True
+
+        # Verifica se 'b' (extremo final do intervalo) é uma raiz.
+        elif abs(f(b)) <= tol:
+            raiz = b
+            passo = True
+
+        else:
+
+            # Verifica se tem divisão por zero.
+            if f(xo) == f(xn):
+                return None, aprox
+
+            # Considere 'xm' como o valor seguinte para 'x' a ser verificado depois de 'xn' e
+            # considere 'xo' como o valor anterior de 'x' que já foi verificado antes do 'xn'.
+            xm = xn - ((f(xn)) * ((xn - xo)/(f(xn)-f(xo))))
+
+            # Verifica se xm pertence ao intevalo [a, b].
+            if a <= xm <= b:
+                # 'xm' pertence ao intevalo [a, b].
+                # Verifica se 'xm' é uma raiz.
+                if abs(f(xm)) <= tol:
+                    raiz = xm
+                    passo = True
+
+                else:
+                    # Adiciona 'xn' e 'xm' na list de pontos percorridos.
+                    aprox.append(xn)
+                    aprox.append(xm)
+                    
+                    # 'xo' armazena o valor de 'xn' e 'xn' armazena o valor de 'xm' para calcular o próximo valor para 'x'.
+                    xo = xn
+                    xn = xm
+
+            else:
+                # 'xm' não pertence ao intevalo [a, b].
+                passo = True
+                return None, aprox
+
+    return raiz, aprox # Retorna a raiz e a lista de pontos percorridos.
 
 def metodo_de_newton_raphson(f, a: float, b: float, tol):
 
@@ -79,7 +149,7 @@ def metodo_de_newton_raphson(f, a: float, b: float, tol):
         tol (float): precisão.
 
     Retorna: Valor aproximado da raiz de f(x), com precisão 10⁻⁶ (float), e lista de aproximações. 
-    Retorna (None, []) se não houver mudança de sinal no intervalo.
+    Retorna (None, []) se não tiver raiz ou se não conseguir encontrar por esse método.
     """
 
 	# Inicializa xn como o extremo inicial do intervalo 'a'.
@@ -110,10 +180,12 @@ def metodo_de_newton_raphson(f, a: float, b: float, tol):
 			# Verifica se 'a' (extremo inicial do intervalo) é uma raiz.
             if abs(f(a)) <= tol:
                 raiz = a
+                passo = True
 
 			# Verifica se 'b' (extremo final do intervalo) é uma raiz.
             elif abs(f(b)) <= tol:
                 raiz = b
+                passo = True
 
             else:
 				# Considere xm como o valor seguinte para x a ser verificado depois de xn.
@@ -247,11 +319,13 @@ if __name__ == "__main__":
 
     # Métodos:
     print(f"Raiz aproximada pelo Método da Bisseção: {raiz(f1, 0, 1, 1e-6, method='bissecao'):.3f}")  # Resposta esperada: ≈ 0.567
-    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(f1, 0, 1, 1e-6, method='newton_raphson'):.3f}\n") # Resposta esperada: ≈ 0.567
+    print(f"Raiz aproximada pelo Método de Newton-Raphson: {raiz(f1, 0, 1, 1e-6, method='newton_raphson'):.3f}") # Resposta esperada: ≈ 0.567
+    print(f"Raiz aproximada pelo Método da Secante: {raiz(f1, 0, 1, 1e-6, method='secante'):.3f}\n") # Resposta esperada: ≈ 0.567
 
     # Plotagens:
     plotagem_raiz(f1, a=0, b=1, tol=1e-6, method='bissecao')
     plotagem_raiz(f1, a=0, b=1, tol=1e-6, method='newton_raphson')
+    plotagem_raiz(f1, a=0, b=1, tol=1e-6, method='secante')
 
 
     # Exemplo 2
@@ -263,11 +337,13 @@ if __name__ == "__main__":
     
     # Métodos:
     print(f"Raiz pelo Método da Bisseção: {raiz(f2, 1, 3, 1e-6, method='bissecao'):.1f}")  # Resposta esperada: 2.0
-    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(f2, 1, 3, 1e-6, method='newton_raphson'):.1f}\n") # Resposta esperada: 2.0
+    print(f"Raiz aproximada pelo Método de Newton-Raphson: {raiz(f2, 1, 3, 1e-6, method='newton_raphson'):.1f}") # Resposta esperada: 2.0
+    print(f"Raiz aproximada pelo Método da Secante: {raiz(f2, 1, 3, 1e-6, method='secante'):.1f}\n") # Resposta esperada: 2.0
 
     # Plotagens:
     plotagem_raiz(f2, a=1, b=3, tol=1e-6, method='bissecao')
     plotagem_raiz(f2, a=1, b=3, tol=1e-6, method='newton_raphson')
+    plotagem_raiz(f2, a=1, b=3, tol=1e-6, method='secante')
 
 
     # Exemplo 3
@@ -279,7 +355,8 @@ if __name__ == "__main__":
 
     # Métodos:
     print(f"Raiz pelo Método da Bisseção: {raiz(f3, -1, 1, 1e-6, method='bissecao')}")  # Resposta esperada: None
-    print(f"Raiz aproximada pelo Método da Newton-Raphson: {raiz(f3, -1, 1, 1e-6, method='newton_raphson'):.1f}\n")  # Resposta esperada: 0.0
+    print(f"Raiz aproximada pelo Método de Newton-Raphson: {raiz(f3, -1, 1, 1e-6, method='newton_raphson'):.1f}")  # Resposta esperada: 0.0
+    print(f"Raiz aproximada pelo Método da Secante: {raiz(f3, -1, 1, 1e-6, method='secante')}\n")  # Resposta esperada: None
 
     # Plotagem:
     plotagem_raiz(f3, a=-1, b=1, tol=1e-6, method='newton_raphson')
@@ -294,4 +371,6 @@ if __name__ == "__main__":
 
     # Métodos:
     print(f"Raiz pelo Método da Bisseção: {raiz(f4, -2, 2, 1e-6, method='bissecao')}")  # resposta esperada: None
-    print(f"Raiz pelo Método da Newton-Raphson: {raiz(f4, -2, 2, 1e-6, method='newton_raphson')}\n")  # resposta esperada: None
+    print(f"Raiz pelo Método de Newton-Raphson: {raiz(f4, -2, 2, 1e-6, method='newton_raphson')}")  # resposta esperada: None
+    print(f"Raiz pelo Método da Secante: {raiz(f4, -2, 2, 1e-6, method='secante')}\n")  # resposta esperada: None
+
