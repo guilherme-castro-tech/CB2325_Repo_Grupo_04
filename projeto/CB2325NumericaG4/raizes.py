@@ -195,7 +195,7 @@ def plotagem_raiz(f, a: float, b: float, tol=1e-6, method=None):
         plt.scatter(raiz, f(raiz), color=Paleta[3], label="Raiz final", zorder=5)
 
     # Plotagem:
-    nomes = {"bissecao": "Bisseção", "secante": "Secante", "newton_raphson": "Newton Raphson"}
+    nomes = {"bissecao": "Bisseção", "secante": "Secante", "newton_raphson": "Newton-Raphson"}
 
     plt.title(f"Método da {nomes[method]}")
     plt.xlabel("Eixo X")
@@ -273,7 +273,7 @@ if __name__ == "__main__":
     # Exemplo 3
     # Função e intervalo:
     f3 = lambda x: abs(x)
-    print("  Exemplo 3 (Há raiz, mas a imagem não muda de sinal)  ".center(100, "─"))
+    print("  Exemplo 3 (há raiz, mas a imagem não muda de sinal)  ".center(100, "─"))
     print("\nFunção: f(x) = |x|")
     print("Intervalo: [-1, 1]\n")
 
