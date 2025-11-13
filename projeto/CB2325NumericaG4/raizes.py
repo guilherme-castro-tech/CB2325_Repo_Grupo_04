@@ -13,7 +13,7 @@ def derivada(f, x, h=1e-6):
     Parâmetros: 
         f (função): função contínua;
         x (float): ponto oem que a derivada será calculada;
-        h (float): precisão
+        h (float): precisão.
 
     Retorna: Valor aproximado da derivada de f(x) no ponto x (float).
     """
