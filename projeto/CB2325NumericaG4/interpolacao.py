@@ -2,7 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 from typing import List
-from utils import InterpBase
+from .utils import InterpBase
 
 class Poly_Interp(InterpBase):
     '''
