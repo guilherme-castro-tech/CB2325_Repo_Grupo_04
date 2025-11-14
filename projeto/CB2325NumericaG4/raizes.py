@@ -66,6 +66,7 @@ def metodo_da_bissecao(f, a: float, b: float, tol=1e-6):
     return raiz, aproximacoes
 
 def metodo_da_secante(f, a, b, tol):
+
     """
     Função que determina uma raiz real de f(x) no intervalo [a, b] pelo método da Secante.
     
@@ -315,7 +316,7 @@ if __name__ == "__main__":
     f1 = lambda x: math.exp(-x) - x
     print("  Exemplo 1 (raiz decimal infinita)  ".center(100, "─"))
     print("\nFunção: f(x) = e⁻ˣ-x")
-    print("Intervalo: [0, 1]")
+    print("Intervalo: [0, 1]\n")
 
     # Métodos:
     print(f"Raiz aproximada pelo Método da Bisseção: {raiz(f1, 0, 1, 1e-6, method='bissecao'):.3f}")  # Resposta esperada: ≈ 0.567

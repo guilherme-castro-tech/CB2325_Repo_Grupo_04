@@ -1,6 +1,6 @@
 import math
 import pytest
-from CB2325_Repo_Grupo_04.projeto.CB2325NumericaG4.raizes import raiz
+from raizes import raiz
 
 tol = 1e-6  # Precisão
 
@@ -41,6 +41,6 @@ def test_exemplo4(): # Não há raízes
     assert resultado_bissecao is None
     resultado_newton = raiz(f4, -2, 2, tol, method='newton_raphson')
     assert resultado_newton is None
-    resultado_newton = raiz(f4, -2, 2, tol, method='secante')
+    resultado_secante = raiz(f4, -2, 2, tol, method='secante')
     assert resultado_secante is None
     
