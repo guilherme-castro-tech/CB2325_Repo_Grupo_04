@@ -33,4 +33,20 @@ No presente repositório, desenvolveu uma pequena bilioteca para utilização de
   </ul>
   <li><strong>Orientacoes.pdf</strong> - Orientações sobre o presente trabalho</li>
   <li><strong>padronizacao.ipynb</strong> - Notebook com os padrões de formatação</li>
+  <li><strong>pyproject.toml</strong> - Lista de dependências da biblioteca</li>
 </ul>
+
+## Dependências
+
+O projeto depende das seguintes bibliotecas:
+
+- `numpy`
+- `sympy`
+- `scipy`
+- `matplotlib`
+
+O repositório contém um arquivo `pyproject.toml` especificando as versões recomendadas, além de um arquivo `uv.lock` para uso com o gerenciador de pacotes `uv`. Assim, para instalar as dependências dessa biblioteca, basta rodar:
+
+```bash
+uv sync
+```

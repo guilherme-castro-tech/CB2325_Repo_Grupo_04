@@ -1,0 +1,12 @@
+[project]
+name = "cb2325-repo-grupo-04"
+version = "0.1.0"
+description = "Repositório do Grupo 04 voltado ao trabalho de Métodos Numéricos de Programação 02. IMPATech - CB23"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "matplotlib>=3.10.7",
+    "numpy>=2.3.4",
+    "scipy>=1.16.3",
+    "sympy>=1.14.0",
+]
