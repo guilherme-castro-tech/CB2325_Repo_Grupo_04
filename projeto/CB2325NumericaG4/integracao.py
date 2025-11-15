@@ -311,7 +311,7 @@ def monteCarlo(funcao, a, b, c, d, n=1000) -> IntegralNumerica:
     d (float): Limite superior de integração na 2ª dimensão;
     n (int): Número de repetições do experimento.
 
-    Retorna: "(float) Valor aproximado da integral definida da função no retângulo especificado"
+    Retorna: "(IntegralNumerica) Objeto representando o resultado da computação."
     """
 
     s = 0
@@ -326,6 +326,20 @@ def monteCarlo(funcao, a, b, c, d, n=1000) -> IntegralNumerica:
 
 
 def plot_monteCarlo(f, a, b, c, d, n=1000, salvar_como=None) -> IntegralNumerica:
+    """
+    Calcula e plota a integral de uma função f : R² -> R pelo método de Monte Carlo.
+
+    Parâmetros:     
+    funcao: Função a ser integrada;  
+    a (float): Limite inferior de integração na 1ª dimensão;
+    b (float): Limite superior de integração na 1ª dimensão;
+    c (float): Limite inferior de integração na 2ª dimensão;
+    d (float): Limite superior de integração na 2ª dimensão;
+    n (int): Número de repetições do experimento.
+    salvar_como (str ou None): Caminho para salvar a image. Se None, apenas mostra o gráfico, sem salvar.
+
+    Retorna: "(IntegralNumerica) Objeto representando o resultado da computação."
+    """
     integral = monteCarlo(f, a, b, c, d, n)
     fig, ax = plt.subplots()
     ax.set_xlabel('Componente X')
@@ -351,9 +365,9 @@ def plot_monteCarlo(f, a, b, c, d, n=1000, salvar_como=None) -> IntegralNumerica
 
 
 if __name__ == "__main__":
-    # print(plot_integral_rect(np.cos, 0, 4.5 * np.pi, n=40, simple=False))
-    # print(plot_integral_trap(np.cos, 0, 4.5 * np.pi, n=40, simple=False))
-    # print(plot_integral_simpson(np.cos, 0, 4.5 * np.pi, n=20, simple=False))
+    print(plot_integral_rect(np.cos, 0, 4.5 * np.pi, n=40, simple=False))
+    print(plot_integral_trap(np.cos, 0, 4.5 * np.pi, n=40, simple=False))
+    print(plot_integral_simpson(np.cos, 0, 4.5 * np.pi, n=20, simple=False))
     # print(plot_integral_simpson(np.cos, 0, 4.5 * np.pi, n=5))
-    # print(plot_integral_simpson(np.cos, 0, 4.5 * np.pi, n=1000))
-    print(plot_monteCarlo(lambda x, y: np.sin(x) + np.cos(y), 0, 3 *np.pi, 0, 2 *np.pi, n=10000))
+    print(plot_integral_simpson(np.cos, 0, 4.5 * np.pi, n=1000))
+    # print(plot_monteCarlo(lambda x, y: np.sin(x) + np.cos(y), 0, 3 *np.pi, 0, 2 *np.pi, n=10000))

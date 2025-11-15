@@ -3,7 +3,7 @@ Repositório do Grupo 04 voltado ao trabalho de Métodos Numéricos de Programa�
 
 <img src="images/capa.png">
 
-No presente repositório, desenvolveu uma pequena bilioteca para utilização de métodos numéricos diversos como interpolação, integração, encontrar raízes de funções, aproximações e erros. A organização de dirtórios ficou como segue:
+No presente repositório, desenvolveu uma pequena bilioteca para utilização de métodos numéricos diversos como interpolação, integração, encontrar raízes de funções, aproximações e erros. A organização de diretórios ficou como segue:
 
 <ul>
   <li><strong>/images</strong> - Pasta com imagens para a readme.md</li>
